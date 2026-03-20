@@ -1,0 +1,7 @@
+{
+  "name": "Hike Weaver",
+  "description": "Generate randomized hiking routes connecting local tourist spots and interesting landmarks based on your desired distance.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
