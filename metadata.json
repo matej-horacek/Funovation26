@@ -1,6 +1,6 @@
 {
-  "name": "Hike Weaver",
-  "description": "Generate randomized hiking routes connecting local tourist spots and interesting landmarks based on your desired distance.",
+  "name": "Mapy.cz Locator",
+  "description": "A simple web application that finds your current location and displays it on a Mapy.cz map.",
   "requestFramePermissions": [
     "geolocation"
   ]

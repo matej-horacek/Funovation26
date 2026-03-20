@@ -1,490 +1,594 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { 
-  APIProvider, 
-  Map, 
-  useMap, 
-  useMapsLibrary, 
-  AdvancedMarker, 
-  Pin, 
-  InfoWindow,
-  useAdvancedMarkerRef
-} from '@vis.gl/react-google-maps';
-import { MapPin, Navigation, RefreshCw, Info, Compass, Map as MapIcon, ChevronRight } from 'lucide-react';
-import { cn } from './lib/utils';
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-// --- CONFIGURATION ---
-// If you are exporting this app to run locally, paste your Google Maps API Key here.
-// In AI Studio, it is recommended to use the Secrets panel (GOOGLE_MAPS_PLATFORM_KEY).
-const EXPORT_API_KEY = 'AIzaSyAxoD1FwSnMcV-9WnpLzUitRtntUvH4NDA'; 
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { MapPin, Navigation, LocateFixed, Loader2, AlertCircle, Search, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const API_KEY = EXPORT_API_KEY || process.env.GOOGLE_MAPS_PLATFORM_KEY || '';
-const hasValidKey = Boolean(API_KEY) && API_KEY !== 'YOUR_API_KEY' && API_KEY !== '';
+// Mapy.cz API Key provided by user
+const MAPY_CZ_API_KEY = 'AbZ0brnIi8jPKiCNZvqfJlhNd3dpMI4q-9oooZ6irDk';
 
-// --- Components ---
+// Fix for default Leaflet icon paths
+// @ts-ignore
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
-function SplashScreen() {
-  return (
-    <div className="flex items-center justify-center h-screen bg-stone-50 p-6">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-stone-200">
-        <div className="flex justify-center mb-6">
-          <div className="p-4 bg-emerald-100 rounded-2xl">
-            <MapIcon className="w-10 h-10 text-emerald-600" />
-          </div>
-        </div>
-        <h2 className="text-2xl font-bold text-stone-900 text-center mb-2">Google Maps API Key Required</h2>
-        <p className="text-stone-600 text-center mb-8">To start weaving your hikes, you'll need to connect your Google Maps API key.</p>
-        
-        <div className="space-y-4 text-sm">
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center font-bold text-stone-500">1</div>
-            <div className="text-stone-700">
-              <p>Get an API Key from the <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener" className="text-emerald-600 hover:underline font-medium">Google Cloud Console</a>.</p>
-              <p className="mt-2 text-xs text-stone-500 font-medium uppercase tracking-wider">Required APIs to Enable:</p>
-              <ul className="list-disc list-inside text-xs text-stone-500 mt-1">
-                <li>Maps JavaScript API</li>
-                <li>Places API (New)</li>
-                <li>Routes API</li>
-              </ul>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center font-bold text-stone-500">2</div>
-            <div className="text-stone-700">
-              <p className="mb-2">Add your key as a secret in AI Studio:</p>
-              <ul className="list-disc list-inside space-y-1 pl-2 text-stone-500">
-                <li>Open <strong>Settings</strong> (⚙️ gear icon)</li>
-                <li>Select <strong>Secrets</strong></li>
-                <li>Name: <code className="bg-stone-100 px-1 rounded text-stone-900">GOOGLE_MAPS_PLATFORM_KEY</code></li>
-                <li>Value: Paste your key</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-100">
-          <h4 className="text-xs font-bold text-amber-800 uppercase mb-1">Seeing "ApiNotActivatedMapError"?</h4>
-          <p className="text-[11px] text-amber-700 leading-relaxed">
-            This means your API key is working, but the <strong>Maps JavaScript API</strong> isn't enabled yet. 
-            Go to the <a href="https://console.cloud.google.com/google/maps-apis/api-list" target="_blank" rel="noopener" className="underline font-bold">API Library</a> and click "Enable" for the three APIs listed above.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+interface SuggestItem {
+  name: string;
+  label: string;
+  position?: {
+    lat: number;
+    lon: number;
+  };
+  location?: {
+    lat: number;
+    lon: number;
+  };
+  type: string;
 }
 
-function RouteDisplay({ origin, waypoints, onRouteCalculated }: { 
-  origin: google.maps.LatLngLiteral, 
-  waypoints: google.maps.LatLngLiteral[],
-  onRouteCalculated: (distance: number, duration: number) => void
-}) {
-  const map = useMap();
-  const routesLib = useMapsLibrary('routes');
-  const polylinesRef = useRef<google.maps.Polyline[]>([]);
-
-  useEffect(() => {
-    if (!routesLib || !map || waypoints.length === 0) return;
-
-    // Clear previous route
-    polylinesRef.current.forEach(p => p.setMap(null));
-
-    const destination = waypoints[waypoints.length - 1];
-    const intermediateWaypoints = waypoints.slice(0, -1);
-
-    (routesLib as any).Route.computeRoutes({
-      origin: origin,
-      destination: destination,
-      intermediates: intermediateWaypoints.map(wp => ({ location: { latLng: wp } })),
-      travelMode: 'WALKING',
-      fields: ['path', 'distanceMeters', 'durationMillis', 'viewport'],
-    }).then(({ routes }: { routes: any[] }) => {
-      if (routes?.[0]) {
-        const newPolylines = routes[0].createPolylines();
-        newPolylines.forEach((p: any) => p.setMap(map));
-        polylinesRef.current = newPolylines;
-        
-        if (routes[0].viewport) {
-          map.fitBounds(routes[0].viewport, 50);
-        }
-        
-        onRouteCalculated(
-          routes[0].distanceMeters / 1000, 
-          Math.round(routes[0].durationMillis / 60000)
-        );
-      }
-    }).catch(err => {
-      console.error("Route calculation failed:", err);
-      // Fallback: if intermediates fail, try a simple direct route
-      if (intermediateWaypoints.length > 0) {
-        (routesLib as any).Route.computeRoutes({
-          origin: origin,
-          destination: destination,
-          travelMode: 'WALKING',
-          fields: ['path', 'distanceMeters', 'durationMillis', 'viewport'],
-        }).then(({ routes }: { routes: any[] }) => {
-          if (routes?.[0]) {
-            const newPolylines = routes[0].createPolylines();
-            newPolylines.forEach((p: any) => p.setMap(map));
-            polylinesRef.current = newPolylines;
-            onRouteCalculated(routes[0].distanceMeters / 1000, Math.round(routes[0].durationMillis / 60000));
-          }
-        });
-      }
-    });
-
-    return () => polylinesRef.current.forEach(p => p.setMap(null));
-  }, [routesLib, map, origin, waypoints, onRouteCalculated]);
-
-  return null;
-}
-
-function HikeWeaver() {
-  const map = useMap();
-  const placesLib = useMapsLibrary('places');
-  const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
-  const [locationName, setLocationName] = useState<string>("Detecting location...");
-  const [targetDistance, setTargetDistance] = useState<number>(5);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [spots, setSpots] = useState<google.maps.places.Place[]>([]);
-  const [hikeWaypoints, setHikeWaypoints] = useState<google.maps.LatLngLiteral[]>([]);
-  const [actualDistance, setActualDistance] = useState<number | null>(null);
-  const [actualDuration, setActualDuration] = useState<number | null>(null);
-  const [selectedSpot, setSelectedSpot] = useState<google.maps.places.Place | null>(null);
-  const autocompleteRef = useRef<HTMLDivElement>(null);
-
-  // Get user location
-  const detectLocation = useCallback(() => {
-    if (navigator.geolocation) {
-      setLocationName("Detecting...");
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const loc = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          setUserLocation(loc);
-          setLocationName("Current Location");
-          map?.panTo(loc);
-          map?.setZoom(14);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          setLocationName("Location blocked. Please search below.");
-        },
-        { timeout: 10000 }
-      );
-    } else {
-      setLocationName("Geolocation not supported.");
-    }
-  }, [map]);
-
-  useEffect(() => {
-    detectLocation();
-  }, [detectLocation]);
-
-  // Initialize Autocomplete for manual location setting
-  useEffect(() => {
-    if (!placesLib || !autocompleteRef.current) return;
-    
-    // Clear existing
-    autocompleteRef.current.innerHTML = '';
-    
-    const el = new (placesLib as any).PlaceAutocompleteElement();
-    // Styling the web component via shadow DOM is hard, so we wrap it
-    autocompleteRef.current.appendChild(el);
-
-    el.addEventListener('gmp-select', async (e: any) => {
-      const place = e.placePrediction.toPlace();
-      await place.fetchFields({ fields: ['displayName', 'location', 'formattedAddress'] });
-      
-      if (place.location) {
-        const loc = {
-          lat: place.location.lat(),
-          lng: place.location.lng()
-        };
-        setUserLocation(loc);
-        setLocationName(place.displayName || "Selected Location");
-        map?.panTo(loc);
-        map?.setZoom(14);
-      }
-    });
-
-    return () => {
-      if (autocompleteRef.current) autocompleteRef.current.innerHTML = '';
-    };
-  }, [placesLib, map]);
-
-  const generateHike = useCallback(async () => {
-    if (!placesLib || !userLocation) return;
-    
-    setIsGenerating(true);
-    setActualDistance(null);
-    setActualDuration(null);
-    setHikeWaypoints([]);
-    
-    try {
-      const searchRadius = (targetDistance * 1000) / 1.5; 
-      
-      const { places } = await placesLib.Place.searchNearby({
-        locationRestriction: { center: userLocation, radius: Math.min(searchRadius, 50000) },
-        includedPrimaryTypes: ['tourist_attraction', 'park', 'museum', 'hiking_area', 'national_park', 'historical_landmark'],
-        fields: ['id', 'displayName', 'location', 'formattedAddress', 'rating', 'photos', 'types'],
-        maxResultCount: 20,
-      });
-
-      if (!places || places.length === 0) {
-        alert("No interesting spots found nearby. Try a different location or distance.");
-        setIsGenerating(false);
-        return;
-      }
-
-      const shuffled = [...places].sort(() => 0.5 - Math.random());
-      const numSpots = Math.min(shuffled.length, 4);
-      const selectedSpots = shuffled.slice(0, numSpots);
-      
-      setSpots(selectedSpots);
-      setHikeWaypoints(selectedSpots.map(s => {
-        const loc = s.location as any;
-        return { lat: loc.lat(), lng: loc.lng() };
-      }));
-      
-    } catch (error) {
-      console.error("Hike generation failed:", error);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [placesLib, userLocation, targetDistance]);
-
-  return (
-    <div className="flex flex-col md:flex-row h-screen bg-stone-50 overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-full md:w-96 bg-white border-r border-stone-200 flex flex-col shadow-2xl z-10">
-        <div className="p-6 border-b border-stone-100">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-emerald-600 rounded-lg">
-              <Compass className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-xl font-bold text-stone-900 tracking-tight">Hike Weaver</h1>
-          </div>
-
-          <div className="space-y-5">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                  Starting Point
-                </label>
-                <button 
-                  onClick={detectLocation}
-                  className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
-                >
-                  <MapPin className="w-3 h-3" />
-                  Locate Me
-                </button>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 text-sm text-stone-600 flex items-center gap-2">
-                  <div className={cn("w-2 h-2 rounded-full", userLocation ? "bg-emerald-500" : "bg-amber-500 animate-pulse")} />
-                  <span className="truncate flex-1">{locationName}</span>
-                </div>
-                
-                <div className="relative">
-                  <div ref={autocompleteRef} className="gmp-autocomplete-container" />
-                  <p className="text-[10px] text-stone-400 mt-1 italic">Search for a place if location is blocked.</p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">
-                Desired Distance (km)
-              </label>
-              <div className="flex items-center gap-4">
-                <input 
-                  type="range" 
-                  min="1" 
-                  max="20" 
-                  step="0.5"
-                  value={targetDistance}
-                  onChange={(e) => setTargetDistance(parseFloat(e.target.value))}
-                  className="flex-1 accent-emerald-600"
-                />
-                <span className="text-lg font-mono font-bold text-stone-900 w-12 text-right">
-                  {targetDistance}
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={generateHike}
-              disabled={isGenerating || !userLocation}
-              className={cn(
-                "w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95",
-                isGenerating || !userLocation
-                  ? "bg-stone-100 text-stone-400 cursor-not-allowed"
-                  : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-200"
-              )}
-            >
-              {isGenerating ? (
-                <RefreshCw className="w-5 h-5 animate-spin" />
-              ) : (
-                <Navigation className="w-5 h-5" />
-              )}
-              {isGenerating ? "Weaving..." : "Generate Hike"}
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {actualDistance !== null && (
-            <div className="bg-stone-900 text-white p-5 rounded-3xl shadow-xl">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400 mb-1">Total Distance</p>
-                  <p className="text-2xl font-mono font-bold">{actualDistance.toFixed(1)} km</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-stone-400 mb-1">Est. Duration</p>
-                  <p className="text-2xl font-mono font-bold">{actualDuration} min</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {spots.length > 0 ? (
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">Stops on your hike</h3>
-              {spots.map((spot, idx) => (
-                <button
-                  key={spot.id}
-                  onClick={() => {
-                    setSelectedSpot(spot);
-                    if (spot.location) map?.panTo(spot.location);
-                  }}
-                  className={cn(
-                    "w-full text-left p-4 rounded-2xl border transition-all flex items-start gap-3 group",
-                    selectedSpot?.id === spot.id
-                      ? "bg-emerald-50 border-emerald-200"
-                      : "bg-white border-stone-100 hover:border-stone-200"
-                  )}
-                >
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-stone-900 text-white flex items-center justify-center text-[10px] font-bold mt-0.5">
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-stone-900 truncate group-hover:text-emerald-700 transition-colors">
-                      {spot.displayName}
-                    </p>
-                    <p className="text-xs text-stone-500 truncate">{spot.formattedAddress}</p>
-                    {spot.rating && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <span className="text-amber-400 text-xs">★</span>
-                        <span className="text-[10px] font-bold text-stone-400">{spot.rating}</span>
-                      </div>
-                    )}
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-stone-300 mt-1" />
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-40">
-              <Compass className="w-12 h-12 mb-4 text-stone-300" />
-              <p className="text-sm text-stone-500 italic">Set your distance and click generate to weave a new adventure.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Map Area */}
-      <div className="flex-1 relative">
-        <Map
-          defaultCenter={{ lat: 37.42, lng: -122.08 }}
-          defaultZoom={13}
-          mapId="HIKE_WEAVER_MAP"
-          internalUsageAttributionIds={['gmp_mcp_codeassist_v1_aistudio']}
-          className="w-full h-full"
-          gestureHandling="greedy"
-          disableDefaultUI={true}
-        >
-          {userLocation && (
-            <AdvancedMarker position={userLocation} title="You are here">
-              <div className="relative">
-                <div className="absolute -inset-2 bg-emerald-500/20 rounded-full animate-pulse" />
-                <div className="w-4 h-4 bg-emerald-600 rounded-full border-2 border-white shadow-lg" />
-              </div>
-            </AdvancedMarker>
-          )}
-
-          {spots.map((spot, idx) => (
-            <AdvancedMarker
-              key={spot.id}
-              position={spot.location}
-              onClick={() => setSelectedSpot(spot)}
-            >
-              <div className="relative group">
-                <div className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-xl transition-all",
-                  selectedSpot?.id === spot.id ? "bg-emerald-600 scale-125 z-20" : "bg-stone-900 group-hover:scale-110"
-                )}>
-                  <span className="text-white text-xs font-bold">{idx + 1}</span>
-                </div>
-              </div>
-            </AdvancedMarker>
-          ))}
-
-          {selectedSpot && selectedSpot.location && (
-            <InfoWindow
-              position={selectedSpot.location}
-              onCloseClick={() => setSelectedSpot(null)}
-              headerDisabled
-            >
-              <div className="p-1 max-w-[200px]">
-                {selectedSpot.photos?.[0] && (
-                  <img 
-                    src={selectedSpot.photos[0].getURI({ maxWidth: 200 })} 
-                    alt={selectedSpot.displayName}
-                    className="w-full h-24 object-cover rounded-lg mb-2"
-                    referrerPolicy="no-referrer"
-                  />
-                )}
-                <h4 className="font-bold text-stone-900 text-sm leading-tight mb-1">{selectedSpot.displayName}</h4>
-                <p className="text-[10px] text-stone-500 leading-snug mb-2">{selectedSpot.formattedAddress}</p>
-                <div className="flex flex-wrap gap-1">
-                  {selectedSpot.types?.slice(0, 2).map(type => (
-                    <span key={type} className="text-[8px] px-1.5 py-0.5 bg-stone-100 rounded-full text-stone-500 uppercase tracking-wider font-bold">
-                      {type.replace(/_/g, ' ')}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </InfoWindow>
-          )}
-
-          {userLocation && hikeWaypoints.length > 0 && (
-            <RouteDisplay 
-              origin={userLocation} 
-              waypoints={hikeWaypoints} 
-              onRouteCalculated={(dist, dur) => {
-                setActualDistance(dist);
-                setActualDuration(dur);
-              }}
-            />
-          )}
-        </Map>
-      </div>
-    </div>
-  );
+interface RouteInfo {
+  distance: number;
+  duration: number;
+  geometry: any;
 }
 
 export default function App() {
-  if (!hasValidKey) {
-    return <SplashScreen />;
-  }
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+  const routeLayerRef = useRef<L.Polyline | null>(null);
+  const poiMarkersRef = useRef<L.Marker[]>([]);
+  
+  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  // Route generation states
+  const [targetDistance, setTargetDistance] = useState(5); // km
+  const [isGeneratingRoute, setIsGeneratingRoute] = useState(false);
+  const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
+
+  // Initialize Geolocation
+  const initGeolocation = useCallback(() => {
+    setError(null);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const newLoc = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          };
+          setLocation(newLoc);
+          setLoading(false);
+          setError(null);
+        },
+        (err) => {
+          console.error("Geolocation error:", err);
+          let msg = "Nepodařilo se získat polohu.";
+          if (err.code === 1) msg = "Přístup k poloze byl zamítnut. Povolte prosím polohu v prohlížeči.";
+          if (err.code === 3) msg = "Vypršel čas pro získání polohy.";
+          
+          setError(msg);
+          // Default to Prague if we don't have any location yet
+          if (!location) {
+            setLocation({ lat: 50.0755, lon: 14.4378 });
+          }
+          setLoading(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      setError("Váš prohlížeč nepodporuje geolokaci.");
+      setLocation({ lat: 50.0755, lon: 14.4378 });
+      setLoading(false);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    initGeolocation();
+  }, []);
+
+  // Initialize Map
+  useEffect(() => {
+    if (location && mapContainerRef.current && !mapInstanceRef.current) {
+      // Create map instance
+      const map = L.map(mapContainerRef.current).setView([location.lat, location.lon], 13);
+      
+      // Add Mapy.cz REST Tiles
+      L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${MAPY_CZ_API_KEY}`, {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.seznam.cz/">Seznam.cz, a.s.</a>'
+      }).addTo(map);
+
+      // Add marker
+      const marker = L.marker([location.lat, location.lon]).addTo(map);
+      
+      mapInstanceRef.current = map;
+      markerRef.current = marker;
+    } else if (location && mapInstanceRef.current && markerRef.current) {
+      // Update map and marker if location changes (only if not in a route)
+      if (!routeInfo) {
+        mapInstanceRef.current.setView([location.lat, location.lon]);
+        markerRef.current.setLatLng([location.lat, location.lon]);
+      }
+    }
+  }, [location, routeInfo]);
+
+  // Generate Tourist Route
+  const generateTouristRoute = async () => {
+    if (!location || !mapInstanceRef.current) return;
+    
+    setIsGeneratingRoute(true);
+    setError(null);
+    
+    // Clear previous route and markers
+    if (routeLayerRef.current) {
+      mapInstanceRef.current.removeLayer(routeLayerRef.current);
+      routeLayerRef.current = null;
+    }
+    poiMarkersRef.current.forEach(m => mapInstanceRef.current?.removeLayer(m));
+    poiMarkersRef.current = [];
+    setRouteInfo(null);
+
+    try {
+      // 1. Získání POI přes bezplatné Overpass API (OpenStreetMap)
+      const searchRadius = Math.round((targetDistance * 1000) / 2.5); 
+      const overpassQuery = `[out:json][timeout:5];
+(
+  node["tourism"~"viewpoint|museum|attraction"](around:${searchRadius},${location.lat},${location.lon});
+  node["historic"~"castle|monument"](around:${searchRadius},${location.lat},${location.lon});
+);
+out 3;`;
+      
+      let selectedPois: any[] = [];
+
+      try {
+        const searchResponse = await fetch('https://overpass-api.de/api/interpreter', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: `data=${encodeURIComponent(overpassQuery)}`
+        });
+        
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          selectedPois = searchData.elements || [];
+        } else {
+          console.warn("Overpass API vrátilo chybu:", searchResponse.status);
+        }
+      } catch (osmErr) {
+        console.warn("Chyba spojení s OSM (pravděpodobně výpadek serveru nebo blokace):", osmErr);
+      }
+
+      // 2. ZÁLOŽNÍ PLÁN: Pokud je Overpass API přetížené nebo nic nenajde
+      if (selectedPois.length === 0) {
+        console.log("OSM nedostupné, používám vygenerovaný záložní bod pro ukázku trasy.");
+        const offset = (targetDistance / 2) / 111; 
+        selectedPois = [{
+          lat: location.lat + offset,
+          lon: location.lon + offset,
+          tags: { name: "Cíl výletu (Záložní bod)" }
+        }];
+      }
+      
+    // 3. Spočítáme trasu přes spolehlivé Mapy.cz Routing API
+      const targetDestination = selectedPois[0];
+
+      const routeUrl = new URL('https://api.mapy.cz/v1/routing/route');
+      routeUrl.searchParams.set('apikey', MAPY_CZ_API_KEY);
+      routeUrl.searchParams.set('lang', 'cs');
+      
+      // KLÍČOVÁ OPRAVA: Musíme Mapy.cz donutit vrátit data jako GeoJSON objekt!
+      routeUrl.searchParams.set('format', 'geojson'); 
+      
+      routeUrl.searchParams.set('start', `${location.lon},${location.lat}`);
+      routeUrl.searchParams.set('end', `${targetDestination.lon},${targetDestination.lat}`);
+      routeUrl.searchParams.set('routeType', 'foot_hiking'); 
+      
+      const routeResponse = await fetch(routeUrl.toString());
+      if (!routeResponse.ok) {
+        const errorText = await routeResponse.text();
+        throw new Error(`Mapy API odmítlo trasu (Status: ${routeResponse.status}): ${errorText}`);
+      }
+      
+      const routeData = await routeResponse.json();
+      
+      if (routeData.geometry) {
+        // CHYTRÝ PÁTRAČ (Rekurzivní funkce), který najde souřadnice ať jsou zabalené jakkoliv
+        const findCoordinates = (obj: any): any[] => {
+          if (!obj) return [];
+          
+          if (Array.isArray(obj)) {
+            if (obj.length === 0) return [];
+            // Je to samotný bod?
+            if (typeof obj[0] === 'number') return [obj];
+            // Máme seznam bodů [lon, lat]?
+            if (Array.isArray(obj[0]) && typeof obj[0][0] === 'number') return obj;
+            
+            // Pro případ rozdělených úseků (MultiLineString)
+            let coords: any[] = [];
+            obj.forEach((item: any) => { coords = coords.concat(findCoordinates(item)); });
+            return coords;
+          }
+          
+          // Prohledávání zanořených objektů (Feature, Geometry, GeometryCollection atd.)
+          let coords: any[] = [];
+          if (obj.geometry) coords = coords.concat(findCoordinates(obj.geometry));
+          if (obj.coordinates) coords = coords.concat(findCoordinates(obj.coordinates));
+          if (obj.features) coords = coords.concat(findCoordinates(obj.features));
+          if (obj.geometries) coords = coords.concat(findCoordinates(obj.geometries));
+          
+          return coords;
+        };
+
+        const coordinates = findCoordinates(routeData.geometry);
+
+        // Pokud to nenajde nic, vypíše přesnou strukturu do konzole F12
+        if (coordinates.length === 0) {
+          console.error("Záhadná struktura z Mapy.cz:", routeData);
+          throw new Error("Nepodařilo se najít souřadnice. Otevřete konzoli prohlížeče (F12) pro detaily.");
+        }
+
+        // Dekódování geometrie pro Leaflet (GeoJSON vrací [lon, lat], Leaflet potřebuje [lat, lon])
+        const latLngs = coordinates.map((c: any) => [c[1], c[0]]);
+        
+        // Vykreslení trasy na mapě
+        const polyline = L.polyline(latLngs, { color: '#059669', weight: 6, opacity: 0.8 }).addTo(mapInstanceRef.current);
+        routeLayerRef.current = polyline;
+        
+        // Vykreslení cílového bodu
+        const m = L.marker([targetDestination.lat, targetDestination.lon], {
+          icon: L.divIcon({
+            className: 'bg-emerald-600 w-4 h-4 rounded-full border-2 border-white shadow-lg',
+            iconSize: [16, 16]
+          })
+        }).addTo(mapInstanceRef.current!);
+        
+        const poiName = targetDestination.tags?.name || "Cíl výletu";
+        m.bindPopup(`<b>${poiName}</b>`);
+        poiMarkersRef.current.push(m);
+
+        // Přiblížení na trasu
+        mapInstanceRef.current.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+        
+        setRouteInfo({
+          distance: routeData.length / 1000,
+          duration: routeData.duration / 60,
+          geometry: routeData.geometry
+        });
+      }
+    } catch (err) {
+      console.error("Route generation error:", err);
+      setError("Nepodařilo se vygenerovat trasu. Zkontrolujte připojení k internetu.");
+    } finally {
+      setIsGeneratingRoute(false);
+    }
+  };
+
+  const clearRoute = () => {
+    if (mapInstanceRef.current) {
+      if (routeLayerRef.current) {
+        mapInstanceRef.current.removeLayer(routeLayerRef.current);
+        routeLayerRef.current = null;
+      }
+      poiMarkersRef.current.forEach(m => mapInstanceRef.current?.removeLayer(m));
+      poiMarkersRef.current = [];
+      
+      if (location) {
+        mapInstanceRef.current.setView([location.lat, location.lon], 13);
+      }
+    }
+    setRouteInfo(null);
+  };
+
+  // Handle Search Suggestions via REST API
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchQuery.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      try {
+        const url = `https://api.mapy.cz/v1/suggest?query=${encodeURIComponent(searchQuery)}&apikey=${MAPY_CZ_API_KEY}&lang=cs&limit=5`;
+        const response = await fetch(url, {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSuggestions(data.items || []);
+        } else {
+          console.error("Suggest API error response:", response.status);
+        }
+      } catch (err) {
+        console.error("Suggest API fetch error:", err);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const handleSelectSuggestion = (item: SuggestItem) => {
+    let lat = item.position?.lat;
+    let lon = item.position?.lon;
+
+    if (lat === undefined || lon === undefined) {
+      lat = item.location?.lat;
+      lon = item.location?.lon;
+    }
+
+    if (typeof lat !== 'number' || typeof lon !== 'number') {
+      console.error("Vybraná položka z našeptávače neobsahuje platné souřadnice:", item);
+      return;
+    }
+
+    const newLoc = { lat, lon };
+    setLocation(newLoc);
+    setSearchQuery(item.name);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setError(null);
+  };
+
+  const handleRecenter = () => {
+    if (mapInstanceRef.current && location) {
+      mapInstanceRef.current.setView([location.lat, location.lon], 15);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSuggestions([]);
+  };
 
   return (
-    <APIProvider apiKey={API_KEY} version="weekly">
-      <HikeWeaver />
-    </APIProvider>
+    <div className="flex flex-col h-screen bg-stone-50 font-sans text-stone-900 overflow-hidden">
+      {/* Header */}
+      <header className="z-30 bg-white/80 backdrop-blur-md border-b border-stone-200 px-6 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="bg-emerald-600 p-2 rounded-xl shadow-lg shadow-emerald-200">
+            <Navigation className="w-5 h-5 text-white" />
+          </div>
+          <div className="hidden sm:block">
+            <h1 className="text-xl font-semibold tracking-tight">Mapy.cz REST</h1>
+            <p className="text-xs text-stone-500 font-medium uppercase tracking-widest">Moderní Mapy</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3 flex-1 max-w-md mx-4 relative">
+          <div className="relative w-full group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 group-focus-within:text-emerald-600 transition-colors pointer-events-none" />
+            <input 
+              type="text"
+              placeholder="Hledat místo..."
+              value={searchQuery}
+              onFocus={() => setShowSuggestions(true)}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-stone-100 border-none rounded-2xl py-3 pl-11 pr-10 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all outline-none shadow-inner"
+            />
+            {searchQuery && (
+              <button 
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-stone-200 rounded-full transition-colors"
+              >
+                <X className="w-3 h-3 text-stone-500" />
+              </button>
+            )}
+          </div>
+
+          {/* Suggestions Dropdown */}
+          <AnimatePresence>
+            {showSuggestions && suggestions.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-white border border-stone-200 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-64 overflow-y-auto"
+              >
+                {suggestions.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSelectSuggestion(item)}
+                    className="w-full text-left px-4 py-3 hover:bg-stone-50 transition-colors border-b border-stone-100 last:border-none flex flex-col"
+                  >
+                    <span className="font-semibold text-sm text-stone-900">{item.name}</span>
+                    <span className="text-xs text-stone-500 truncate">{item.label}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <button 
+          onClick={handleRecenter}
+          disabled={!location}
+          className="flex items-center gap-2 bg-stone-900 text-white px-5 py-3 rounded-2xl text-sm font-medium hover:bg-stone-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shrink-0"
+        >
+          <LocateFixed className="w-4 h-4" />
+          <span className="hidden md:inline">Moje poloha</span>
+        </button>
+      </header>
+
+      {/* Route Controls Overlay */}
+      <div className="absolute top-24 right-6 z-20 flex flex-col gap-3 w-64">
+        <div className="bg-white/90 backdrop-blur-md border border-stone-200 p-4 rounded-3xl shadow-xl">
+          <h3 className="text-sm font-bold text-stone-900 mb-3 flex items-center gap-2">
+            <Navigation className="w-4 h-4 text-emerald-600" />
+            Plánovač výletu
+          </h3>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] uppercase font-bold text-stone-400 block mb-2">Cílová vzdálenost: {targetDistance} km</label>
+              <input 
+                type="range" 
+                min="2" 
+                max="30" 
+                step="1"
+                value={targetDistance}
+                onChange={(e) => setTargetDistance(parseInt(e.target.value))}
+                className="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+              />
+              <div className="flex justify-between text-[10px] text-stone-400 mt-1">
+                <span>2 km</span>
+                <span>30 km</span>
+              </div>
+            </div>
+
+            <button 
+              onClick={generateTouristRoute}
+              disabled={isGeneratingRoute || !location}
+              className="w-full bg-emerald-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-100 disabled:opacity-50"
+            >
+              {isGeneratingRoute ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Plánuji...
+                </>
+              ) : (
+                <>
+                  <Navigation className="w-4 h-4" />
+                  Vytvořit trasu
+                </>
+              )}
+            </button>
+
+            {routeInfo && (
+              <button 
+                onClick={clearRoute}
+                className="w-full text-stone-500 text-xs font-medium hover:text-stone-700 transition-colors"
+              >
+                Zrušit trasu
+              </button>
+            )}
+          </div>
+        </div>
+
+        {routeInfo && (
+          <motion.div 
+            initial={{ x: 50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className="bg-emerald-600 text-white p-4 rounded-3xl shadow-xl"
+          >
+            <p className="text-[10px] uppercase font-bold opacity-70 mb-2">Detaily trasy</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="text-xs block opacity-80">Délka</span>
+                <span className="text-lg font-bold">{(routeInfo.distance || 0).toFixed(1)} km</span>
+              </div>
+              <div>
+                <span className="text-xs block opacity-80">Čas (pěšky)</span>
+                <span className="text-lg font-bold">{Math.round(routeInfo.duration)} min</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 relative" onClick={() => setShowSuggestions(false)}>
+        <AnimatePresence>
+          {loading && (
+            <motion.div 
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-40 bg-stone-50 flex flex-col items-center justify-center gap-4"
+            >
+              <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+              <p className="text-stone-500 font-medium animate-pulse">Načítání mapy...</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {error && (
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 w-full max-w-md px-4">
+            <motion.div 
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-start gap-3 shadow-xl"
+            >
+              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-amber-900 font-semibold text-sm">Upozornění</h3>
+                <p className="text-amber-700 text-sm mt-1">{error}</p>
+                <button 
+                  onClick={initGeolocation}
+                  className="mt-3 text-xs font-bold text-amber-800 underline hover:text-amber-900"
+                >
+                  Zkusit znovu získat polohu
+                </button>
+              </div>
+              <button onClick={() => setError(null)} className="p-1 hover:bg-amber-100 rounded-full">
+                <X className="w-4 h-4 text-amber-600" />
+              </button>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Leaflet Map Container */}
+        <div 
+          ref={mapContainerRef} 
+          className="w-full h-full z-0"
+        />
+
+        {/* Location Info Card */}
+        {location && !loading && (
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 w-full max-w-sm px-4"
+          >
+            <div className="bg-white/90 backdrop-blur-xl border border-white/20 p-5 rounded-3xl shadow-2xl flex items-center gap-5">
+              <div className="w-12 h-12 bg-stone-100 rounded-2xl flex items-center justify-center shrink-0">
+                <MapPin className="w-6 h-6 text-stone-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-stone-400 font-bold uppercase tracking-wider mb-1">Aktuální poloha</p>
+                <div className="flex gap-4">
+                  <div>
+                    <span className="text-[10px] text-stone-400 block uppercase font-bold">Zem. šířka</span>
+                    <span className="font-mono text-sm font-medium">{(location.lat || 0).toFixed(6)}°</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-stone-400 block uppercase font-bold">Zem. délka</span>
+                    <span className="font-mono text-sm font-medium">{(location.lon || 0).toFixed(6)}°</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </main>
+
+      {/* Footer / Attribution */}
+      <footer className="bg-stone-100 px-6 py-2 border-t border-stone-200 flex justify-between items-center">
+        <p className="text-[10px] text-stone-400 font-medium uppercase tracking-tighter">
+          Využívá REST API Mapy.cz & Leaflet
+        </p>
+        <div className="flex gap-4">
+           <span className="text-[10px] text-stone-400 font-medium uppercase tracking-tighter">© Seznam.cz, a.s.</span>
+        </div>
+      </footer>
+    </div>
   );
 }
