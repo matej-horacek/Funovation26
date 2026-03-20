@@ -1,12 +1,18 @@
-<!DOCTYPE html>
-<html lang="cs">
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mapy.cz Locator | REST API & Leaflet</title>
+    <title>Hike Weaver - Mapy.cz</title>
+    <script src="https://api.mapy.cz/loader.js"></script>
+    <script>
+      // Initialize Mapy.cz API
+      Loader.load(null, { poi: true, suggest: true });
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+
