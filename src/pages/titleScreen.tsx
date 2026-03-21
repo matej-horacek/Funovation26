@@ -44,6 +44,7 @@ export default function App() {
   
   // --- Mapy State ---
   const [startPos, setStartPos] = useState('');
+  const [startCoords, setStartCoords] = useState({ lon: '', lat: '' }); // <-- Add this
   const [endPos, setEndPos] = useState('');
   const [numWaypoints, setNumWaypoints] = useState<number>(3);
 
@@ -59,8 +60,15 @@ export default function App() {
   };
 
   const connect = (action: 'create' | 'join') => {
-    let params = `?name=${encodeURIComponent(playerName)}&lname=${encodeURIComponent(lobbyName)}&lcolor=${encodeURIComponent(lobbyColor)}&password=${encodeURIComponent(password)}`;
-    let url = action === "create" ? `${BACKEND_URL}/create${params}` : `${BACKEND_URL}/join/${lobbyId}?name=${encodeURIComponent(playerName)}`;
+    // 1. Grab the actual coordinates from our new state
+    const { lon, lat } = startCoords;
+
+    // 2. Insert them into the parameters (using 'lat' for your 'len' parameter)
+let params = `?name=${encodeURIComponent(playerName)}&lname=${encodeURIComponent(lobbyName)}&lcolor=${encodeURIComponent("#FFFFFF")}&password=${encodeURIComponent(password)}&lat=50.0416769&lon=15.7815900`;
+    // 3. Construct the WebSocket URL
+    let url = action === "create" 
+      ? `${BACKEND_URL}/create${params}` 
+      : `${BACKEND_URL}/join/${lobbyId}?name=${encodeURIComponent(playerName)}`;
 
     const socket = new WebSocket(url);
     socketRef.current = socket;
@@ -116,7 +124,6 @@ export default function App() {
 
     socket.onclose = () => setStatusKey('disconnected');
   };
-
   const fetchData = () => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       socketRef.current.send(JSON.stringify({ Mtype: "getTeams" }));
@@ -128,21 +135,28 @@ export default function App() {
 
     try {
       console.log(`Asking backend to generate trip from ${startPos} to ${endPos} with ${numWaypoints} waypoints...`);
+      
+      // Ensure startPos and endPos are formatted as "lon,lat" strings if that's what Go expects
       const url = `http://localhost:8080/api/generateRoute?start=${encodeURIComponent(startPos)}&end=${encodeURIComponent(endPos)}&numberOfWaypoints=${numWaypoints}`;
       
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
+      // ACTUALLY execute the request
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      const fetchedRoutes: Route[] = []; 
-      const fetchedQuests: RouteWaypointQuest[] = []; 
+      const data = await response.json();
 
-      setTripRoutes(fetchedRoutes);
-      setTripQuests(fetchedQuests);
-      setShowMap(true);
+      // Feed the fetched data into your state
+      setTripRoutes(data.routes ? [data.routes] : []); 
+      setTripQuests(data.quests || []);
+      setShowMap(true);
 
-    } catch (error) {
-      console.error("Failed to fetch trip from backend:", error);
-    }
-  };
+    } catch (error) {
+      console.error("Failed to fetch trip from backend:", error);
+    }
+  };
 
   // ==========================================
   // RENDER (STYLED)
@@ -326,7 +340,8 @@ export default function App() {
 
               {/* Calculate Button */}
               <button 
-                onClick={handleSearch} 
+                //onClick={handleSearch} 
+                onClick={() => setShowMap(true)}
                 className="px-8 py-4 h-[72px] bg-foreground text-background rounded-xl font-black text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all w-full md:w-auto shrink-0 uppercase tracking-wide"
               >
                 {t('routing.calculate_btn')}

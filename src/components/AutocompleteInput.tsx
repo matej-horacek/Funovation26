@@ -5,7 +5,8 @@ const MAPY_API_KEY = 'AbZ0brnIi8jPKiCNZvqfJlhNd3dpMI4q-9oooZ6irDk';
 
 interface Props {
   value: string;
-  onChange: (val: string) => void;
+  // 1. Update the signature to accept optional longitude and latitude
+  onChange: (val: string, lon?: string, lat?: string) => void;
   placeholder: string;
 }
 
@@ -15,6 +16,7 @@ export default function AutocompleteInput({ value, onChange, placeholder }: Prop
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // We only want to search if the user has typed at least 2 characters
     if (value.length < 2) {
       setSuggestions([]);
       return;
@@ -52,6 +54,7 @@ export default function AutocompleteInput({ value, onChange, placeholder }: Prop
       <input
         type="text"
         value={value}
+        // 2. When the user is just typing, we only send the string value
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
         placeholder={placeholder}
@@ -73,7 +76,13 @@ export default function AutocompleteInput({ value, onChange, placeholder }: Prop
               className="px-4 py-3 cursor-pointer border-b border-border/50 last:border-0 
                          hover:bg-primary/10 hover:text-primary transition-colors flex flex-col gap-0.5"
               onClick={() => {
-                onChange(item.name);
+                // 3. Extract coordinates from the Mapy API response. 
+                // The v1 suggest API usually returns them inside a `position` object.
+                const lon = item.position?.lon?.toString();
+                const lat = item.position?.lat?.toString();
+                
+                // 4. Send the name, lon, and lat back to App.tsx
+                onChange(item.name, lon, lat);
                 setShowSuggestions(false);
               }}
             >
