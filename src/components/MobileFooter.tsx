@@ -28,9 +28,9 @@ const mockQuest: WaypointQuest = {
 interface MobileFooterProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
+  onLogout: () => void;
 }
-
-export default function MobileFooter({ activeTab, onTabChange }: MobileFooterProps) {
+export default function MobileFooter({ activeTab, onTabChange, onLogout }: MobileFooterProps) {
   // 2. Initialize translations and get access to the current language
   const { t, i18n } = useTranslation();
   
@@ -161,9 +161,9 @@ export default function MobileFooter({ activeTab, onTabChange }: MobileFooterPro
                                 EN
                             </button>
                             <button 
-                                onClick={() => i18n.changeLanguage('uk')}
+                                onClick={() => i18n.changeLanguage('ua')}
                                 className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
-                                    currentLang === 'uk' 
+                                    currentLang === 'ua' 
                                     ? 'bg-primary text-primary-foreground shadow-md' 
                                     : 'bg-background hover:bg-muted border border-border text-muted-foreground'
                                 }`}
@@ -188,12 +188,16 @@ export default function MobileFooter({ activeTab, onTabChange }: MobileFooterPro
                     </div>
 
                     {/* Logout Button */}
-                    <button className="w-full flex items-center justify-between p-5 bg-destructive/10 text-destructive rounded-2xl border border-destructive/20 font-bold active:scale-95 transition-all group">
-                        <div className="flex items-center gap-3">
-                            <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" /> 
-                            {t('settings.logout')}
-                        </div>
-                    </button>
+                    <button 
+                      className="w-full flex items-center justify-between p-5 bg-destructive/10 text-destructive rounded-2xl border border-destructive/20 font-black active:scale-95 transition-all group hover:bg-destructive/20"
+                      onClick={onLogout} // <--- Call the prop here
+                      >
+                      <div className="flex items-center gap-3">
+                        <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> 
+                        {t('settings.logout')}
+                      </div>
+                      <span className="text-[10px] opacity-50 uppercase tracking-widest">Exit Game</span>
+                  </button> 
                   </div>
                 </div>
               )}

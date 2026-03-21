@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-// 1. IMPORT THE HOOK
+
 import { useTranslation } from 'react-i18next';
 
 
@@ -64,6 +64,8 @@ import MobileFooter, { TabType } from '../components/MobileFooter';
 
 const MAPY_CZ_API_KEY = 'AbZ0brnIi8jPKiCNZvqfJlhNd3dpMI4q-9oooZ6irDk';
 
+
+
 // Fix for Leaflet marker icons in React/Vite
 // @ts-ignore
 delete L.Icon.Default.prototype._getIconUrl;
@@ -77,6 +79,9 @@ interface MapPageProps {
   onBack?: () => void;
 }
 
+
+
+
 export default function MapPage({ onBack }: MapPageProps) {
   // 2. INITIALIZE THE TRANSLATION FUNCTION
   const { t } = useTranslation();
@@ -88,6 +93,11 @@ export default function MapPage({ onBack }: MapPageProps) {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('map');
+
+  const handleLogout = () => {
+    setActiveTab('map'); 
+    onBack();            
+  };
 
   const initGeolocation = useCallback(() => {
     if ("geolocation" in navigator) {
@@ -154,7 +164,11 @@ export default function MapPage({ onBack }: MapPageProps) {
       </main>
 
       {/* Logic for Dark Mode and Overlays is now inside here */}
-      <MobileFooter activeTab={activeTab} onTabChange={setActiveTab} />
+      <MobileFooter 
+  activeTab={activeTab} 
+  onTabChange={setActiveTab} 
+  onLogout={() => onBack()} // If onBack calls setShowMap(false)
+/>
     </div>
   );
 }

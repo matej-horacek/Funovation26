@@ -1,0 +1,95 @@
+{
+  "home": {
+    "main_title": "Це головний екран",
+    "open_map_button": "Відкрити карту"
+  },
+  "map": {
+    "loading": "Завантаження карти...",
+    "warning": "Увага",
+    "retry_location": "Спробувати знову отримати локацію",
+    "current_location": "Поточне місцезнаходження",
+    "latitude": "Широта",
+    "longitude": "Довгота"
+  },
+  "navigation": {
+    "map": "Карта",
+    "quests": "Завдання",
+    "score": "Рахунок",
+    "settings": "Налаштування"
+  },
+  "leaderboard": {
+    "title": "Таблиця лідерів",
+    "player": "Гравець",
+    "rank": "Рейтинг",
+    "points": "Бали"
+  },
+  "settings": {
+    "title": "Налаштування",
+    "language": "Мова",
+    "darkMode": "Темний режим",
+    "logout": "Вийти"
+  },
+  "quests": {
+    "won": "Ти переміг!",
+    "lost": "Ти програв!",
+    "answer_placeholder": "Відповідь...",
+    "submit_input": "ВІДПРАВИТИ",
+    "submit_selection": "ПІДТВЕРДИТИ ВИБІР",
+    "correct": "Правильно!",
+    "incorrect": "Неправильно!",
+    "good_job": "Відмінна робота!",
+    "better_luck": "Наступного разу пощастить більше"
+  },
+  "quest_types": {
+    "Input": "Текстове",
+    "MultipleSelect": "Кілька варіантів",
+    "SingleSelect": "Один варіант"
+  },
+  "search": {
+    "placeholder": "Пошук..."
+  },
+  "messages": {
+    "welcome": "Ласкаво просимо до нашого додатку!",
+    "success": "Успіх!",
+    "error": "Помилка",
+    "loading": "Завантаження...",
+    "noResults": "Немає результатів"
+  },
+  "common": {
+    "close": "Закрити",
+    "cancel": "Скасувати",
+    "confirm": "Підтвердити",
+    "ok": "ОК",
+    "yes": "Так",
+    "no": "Ні"
+  },
+  "status": {
+    "not_connected": "Не підключено",
+    "connected": "Підключено до сервера",
+    "disconnected": "Відключено"
+  },
+  "lobby": {
+    "title": "Вхід у лоббі",
+    "player_name": "Ім'я гравця",
+    "lobby_name": "Назва лоббі",
+    "lobby_color": "Колір лоббі",
+    "password": "Пароль",
+    "join_id": "ID кімнати",
+    "join_placeholder": "Введіть ID для приєднання",
+    "create_btn": "Створити",
+    "join_btn": "Приєднатися",
+    "live_teams": "Активні команди",
+    "refresh_data": "ОНОВИТИ",
+    "team_default": "Команда",
+    "players_count": "Гравців",
+    "waiting_players": "Очікування гравців..."
+  },
+  "routing": {
+    "title": "Розрахунок маршруту",
+    "start_point": "Точка старту",
+    "start_placeholder": "Початкова позиція...",
+    "destination": "Місце призначення",
+    "end_placeholder": "Кінцева позиція...",
+    "calculate_btn": "Розрахувати"
+  }
+}

@@ -4,13 +4,15 @@ import { initReactI18next } from 'react-i18next';
 // Import your JSON files directly since they are in the src folder
 import csJSON from './locales/cs.json';
 import enJSON from './locales/en.json';
+import uaJSON from './locales/ua.json';
 
 i18n
   .use(initReactI18next) // Passes i18n down to react-i18next
   .init({
     resources: {
       en: { translation: enJSON },
-      cs: { translation: csJSON }
+      cs: { translation: csJSON },
+      ua: { translation: uaJSON }
     },
     lng: 'cs', // Your default language
     fallbackLng: 'en', // If a translation is missing in Czech, use English

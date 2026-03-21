@@ -62,5 +62,34 @@
     "ok": "OK",
     "yes": "Ano",
     "no": "Ne"
+  },
+  "status": {
+    "not_connected": "Nepřipojeno",
+    "connected": "Připojeno k serveru",
+    "disconnected": "Odpojeno"
+  },
+  "lobby": {
+    "title": "Vstup do lobby",
+    "player_name": "Jméno hráče",
+    "lobby_name": "Název lobby",
+    "lobby_color": "Barva lobby",
+    "password": "Heslo",
+    "join_id": "ID místnosti",
+    "join_placeholder": "Zadej ID pro připojení",
+    "create_btn": "Vytvořit",
+    "join_btn": "Připojit",
+    "live_teams": "Aktivní týmy",
+    "refresh_data": "AKTUALIZOVAT",
+    "team_default": "Tým",
+    "players_count": "Hráčů",
+    "waiting_players": "Čekání na hráče..."
+  },
+  "routing": {
+    "title": "Výpočet trasy",
+    "start_point": "Startovní bod",
+    "start_placeholder": "Výchozí pozice...",
+    "destination": "Cíl",
+    "end_placeholder": "Cílová pozice...",
+    "calculate_btn": "Vypočítat"
   }
 }
