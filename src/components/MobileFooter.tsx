@@ -128,25 +128,25 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
 
               {/* --- Settings Tab --- */}
               {activeTab === 'settings' && (
-                <div className="overflow-y-auto pr-2 space-y-8 w-full">
-                  <h2 className="text-3xl font-black flex items-center gap-3">
-                    <SettingsIcon className="text-primary w-8 h-8" /> {t('settings.title')}
+                <div className="w-full space-y-6 overflow-y-auto pr-1 sm:pr-2">
+                  <h2 className="flex items-center gap-3 text-2xl font-black sm:text-3xl">
+                    <SettingsIcon className="h-7 w-7 text-primary sm:h-8 sm:w-8" /> {t('settings.title')}
                   </h2>
                   
                   <div className="flex flex-col gap-3">
                     
                     {/* --- Language Selection --- */}
-                    <div className="flex flex-col gap-4 p-5 bg-secondary/50 rounded-2xl border border-border">
+                    <div className="flex flex-col gap-4 rounded-2xl border border-border bg-secondary/50 p-4 sm:p-5">
                         <div className="flex items-center gap-3 font-bold">
                             <Globe className="w-5 h-5 text-primary" />
                             {t('settings.language')}
                         </div>
-                        <div className="flex gap-2 w-full">
+                        <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-4">
                             {/* We use i18n.changeLanguage() directly now */}
                             <button 
                                 type="button"
                                 onClick={() => i18n.changeLanguage('cs')}
-                                className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
+                                className={`min-h-11 rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 ${
                                     currentLang === 'cs' 
                                     ? 'bg-primary text-primary-foreground shadow-md' 
                                     : 'bg-background hover:bg-muted border border-border text-muted-foreground'
@@ -157,7 +157,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                             <button 
                                 type="button"
                                 onClick={() => i18n.changeLanguage('en')}
-                                className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
+                                className={`min-h-11 rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 ${
                                     currentLang === 'en' 
                                     ? 'bg-primary text-primary-foreground shadow-md' 
                                     : 'bg-background hover:bg-muted border border-border text-muted-foreground'
@@ -168,7 +168,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                             <button 
                                 type="button"
                                 onClick={() => i18n.changeLanguage('ua')}
-                                className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
+                                className={`min-h-11 rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 ${
                                     currentLang === 'ua' 
                                     ? 'bg-primary text-primary-foreground shadow-md' 
                                     : 'bg-background hover:bg-muted border border-border text-muted-foreground'
@@ -179,7 +179,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                             <button 
                                 type="button"
                                 onClick={() => i18n.changeLanguage('emoji')}
-                                className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
+                                className={`min-h-11 rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 ${
                                     currentLang === 'emoji' 
                                     ? 'bg-primary text-primary-foreground shadow-md' 
                                     : 'bg-background hover:bg-muted border border-border text-muted-foreground'
@@ -191,7 +191,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                     </div>
 
                     {/* Dark Mode Toggle */}
-                    <div className="flex items-center justify-between p-5 bg-secondary/50 rounded-2xl border border-border">
+                    <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-secondary/50 p-4 sm:p-5">
                         <div className="flex items-center gap-3 font-bold">
                             {isDark ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
                             {t('settings.darkMode')}
@@ -208,14 +208,14 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                     {/* Logout Button */}
                     <button 
                       type="button"
-                      className="w-full flex items-center justify-between p-5 bg-destructive/10 text-destructive rounded-2xl border border-destructive/20 font-black active:scale-95 transition-all group hover:bg-destructive/20"
+                      className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-destructive/20 bg-destructive/10 p-4 font-black text-destructive transition-all active:scale-95 hover:bg-destructive/20 sm:p-5"
                       onClick={onLogout} // <--- Call the prop here
                       >
                       <div className="flex items-center gap-3">
                         <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> 
                         {t('settings.logout')}
                       </div>
-                      <span className="text-[10px] opacity-50 uppercase tracking-widest">Exit Game</span>
+                      <span className="text-right text-[10px] uppercase tracking-widest opacity-50">Exit Game</span>
                   </button> 
                   </div>
                 </div>
