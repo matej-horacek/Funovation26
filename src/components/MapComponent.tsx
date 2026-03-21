@@ -9,6 +9,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Location } from '../types';
 import MapHeader, { SuggestItem } from '../components/Header'; // ZDE UPRAV CESTU PODLE POTŘEBY
 
+// 1. Přidáme import pro překlady
+import { useTranslation } from 'react-i18next';
+
 interface MapComponentProps {
   mapContainerRef: React.RefObject<HTMLDivElement>;
   location: Location | null;
@@ -28,6 +31,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   initGeolocation,
   setShowSuggestions
 }) => {
+  // 2. Inicializujeme hook 't'
+  const { t } = useTranslation();
+
   return (
     <main className="flex-1 relative" onClick={() => setShowSuggestions(false)}>
       <AnimatePresence>
@@ -38,7 +44,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
             className="absolute inset-0 z-40 bg-stone-50 flex flex-col items-center justify-center gap-4"
           >
             <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
-            <p className="text-stone-500 font-medium animate-pulse">Načítání mapy...</p>
+            <p className="text-stone-500 font-medium animate-pulse">{t('map.loading')}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -52,13 +58,14 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           >
             <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
             <div className="flex-1">
-              <h3 className="text-amber-900 font-semibold text-sm">Upozornění</h3>
+              <h3 className="text-amber-900 font-semibold text-sm">{t('map.warning')}</h3>
+              {/* NOTE: The 'error' prop string itself should be translated wherever it is generated! */}
               <p className="text-amber-700 text-sm mt-1">{error}</p>
               <button 
                 onClick={initGeolocation}
                 className="mt-3 text-xs font-bold text-amber-800 underline hover:text-amber-900"
               >
-                Zkusit znovu získat polohu
+                {t('map.retry_location')}
               </button>
             </div>
             <button onClick={() => setError(null)} className="p-1 hover:bg-amber-100 rounded-full">
@@ -86,14 +93,20 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               <MapPin className="w-6 h-6 text-stone-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-stone-400 font-bold uppercase tracking-wider mb-1">Aktuální poloha</p>
+              <p className="text-xs text-stone-400 font-bold uppercase tracking-wider mb-1">
+                {t('map.current_location')}
+              </p>
               <div className="flex gap-4">
                 <div>
-                  <span className="text-[10px] text-stone-400 block uppercase font-bold">Zem. šířka</span>
+                  <span className="text-[10px] text-stone-400 block uppercase font-bold">
+                    {t('map.latitude')}
+                  </span>
                   <span className="font-mono text-sm font-medium">{(location.lat || 0).toFixed(6)}°</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-stone-400 block uppercase font-bold">Zem. délka</span>
+                  <span className="text-[10px] text-stone-400 block uppercase font-bold">
+                    {t('map.longitude')}
+                  </span>
                   <span className="font-mono text-sm font-medium">{(location.lon || 0).toFixed(6)}°</span>
                 </div>
               </div>

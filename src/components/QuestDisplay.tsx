@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, XCircle, Timer } from 'lucide-react';
 
+// 1. Přidáme import pro překlady
+import { useTranslation } from 'react-i18next';
+
 export enum QuestType {
   Input = 0,
   MultipleSelect = 1,
@@ -18,18 +21,19 @@ export interface WaypointQuest {
 
 interface QuestComponentProps {
   quest: WaypointQuest;
-  // CHANGED: Now passes the calculated score back to the parent
   onFinished: (isCorrect: boolean, score: number) => void; 
 }
 
 export default function QuestDisplay({ quest, onFinished }: QuestComponentProps) {
+  // 2. Inicializujeme hook 't'
+  const { t } = useTranslation();
+
   const [timeLeft, setTimeLeft] = useState(quest.timeLimit);
   const [selected, setSelected] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   
-  // CHANGED: Added state to hold the calculated score for the popup
   const [earnedScore, setEarnedScore] = useState<number>(0);
 
   const colors = [
@@ -51,29 +55,24 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
     }
   }, [timeLeft, isSubmitted]);
 
-  // CHANGED: The scoring method
   const calculateScore = (correct: boolean, timeRemaining: number) => {
     if (!correct) return 0;
     
     const BASE_SCORE = 500;
     const MAX_TIME_BONUS = 500;
     
-    // Calculates percentage of time remaining (e.g., 10s left out of 20s = 0.5)
     const timeRatio = timeRemaining / quest.timeLimit;
     
-    // Total score = Base (500) + Math.round(500 * ratio)
     return BASE_SCORE + Math.round(MAX_TIME_BONUS * timeRatio);
   };
 
   const handleFinalResult = (correct: boolean) => {
-    // Calculate and set the score exactly when the user submits
     const finalScore = calculateScore(correct, timeLeft);
     
     setEarnedScore(finalScore);
     setIsCorrect(correct);
     setIsSubmitted(true);
     
-    // Wait for the popup animation to finish before closing the quest
     setTimeout(() => onFinished(correct, finalScore), 2500); 
   };
 
@@ -121,12 +120,14 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
             <span>{timeLeft}s</span>
           </div>
           <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground bg-secondary px-2 py-1 rounded">
-            {QuestType[quest.questType]}
+            {/* Překlad enumu! (Vezme např. 'SingleSelect' a najde to v JSONu) */}
+            {t(`quest_types.${QuestType[quest.questType]}`)}
           </span>
         </div>
 
         {/* --- Question Area --- */}
         <div className="flex-1 flex items-center justify-center min-h-0 w-full overflow-hidden">
+          {/* Note: quest.message is dynamic data from your API/Mock, so we don't translate it here unless your API sends translation keys! */}
           <h3 className="text-xl sm:text-3xl font-black leading-tight text-center text-foreground tracking-tighter line-clamp-4 px-2">
             {quest.message}
           </h3>
@@ -143,15 +144,16 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
                 onChange={(e) => setInputValue(e.target.value)}
                 disabled={isSubmitted}
                 className="w-full p-4 text-lg font-bold bg-secondary rounded-2xl border-4 border-transparent focus:border-primary outline-none"
-                placeholder="Odpověď..."
+                placeholder={t('quests.answer_placeholder')}
               />
               <button onClick={handleSubmit} className="w-full py-4 bg-primary text-primary-foreground rounded-xl font-black text-lg shadow-lg active:scale-95 transition-all">
-                ODESLAT
+                {t('quests.submit_input')}
               </button>
             </div>
           ) : (
             <>
               <div className="grid grid-cols-2 grid-rows-2 gap-2 sm:gap-4 flex-1 min-h-0 w-full">
+                {/* Note: quest.answerOptions are also dynamic data from your backend! */}
                 {quest.answerOptions.map((opt, i) => {
                   const isSelected = selected.includes(opt);
                   return (
@@ -184,7 +186,7 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
                   onClick={handleSubmit} 
                   className="flex-shrink-0 w-full py-3 sm:py-4 bg-foreground text-background rounded-xl font-black text-sm sm:text-lg shadow-lg active:scale-95 transition-all"
                 >
-                  POTVRDIT VÝBĚR
+                  {t('quests.submit_selection')}
                 </button>
               )}
             </>
@@ -222,7 +224,7 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
               transition={{ delay: 0.2 }}
               className="text-5xl sm:text-7xl font-black tracking-tighter drop-shadow-xl text-center"
             >
-              {isCorrect ? 'Správně!' : 'Špatně!'}
+              {isCorrect ? t('quests.correct') : t('quests.incorrect')}
             </motion.h2>
 
             <motion.p
@@ -231,10 +233,9 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
               transition={{ delay: 0.3 }}
               className="mt-4 text-xl sm:text-2xl font-bold opacity-90 tracking-wide text-center"
             >
-              {isCorrect ? 'Výborná práce!' : 'Příště to vyjde lépe'}
+              {isCorrect ? t('quests.good_job') : t('quests.better_luck')}
             </motion.p>
 
-            {/* CHANGED: Animated Score Display */}
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

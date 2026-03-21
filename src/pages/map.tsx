@@ -8,6 +8,56 @@ import { Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+// 1. IMPORT THE HOOK
+import { useTranslation } from 'react-i18next';
+
+
+interface Route{
+    routeId: number;
+    waipoints: Waypoint[];
+}
+
+interface WaypointPlan{
+    route: Route[];
+    stats: {
+        "teamA_km": "1.96",
+        "teamB_km": "1.87"
+    }
+
+}
+
+interface Waypoint{
+    "id": number,
+    "lat": number,
+    "lon": number,
+    "name": string,
+    "locationType": string,
+    "order": number
+}
+
+enum QuestType{
+    Input,
+    MultipleSelect,
+    SingleSelect,
+}
+
+interface WaypointQuest{
+    timeLimit: number;
+    message:string;
+    questType: QuestType;
+    correctAnswers:string[];
+    answerOptions:string[];
+}
+
+interface RouteWaypointQuest{
+    routeId: number;
+    routeWaypointQuests : WaypointQuests[];
+}
+
+interface WaypointQuests{
+    waypoinId: number;
+    waypointQuests : WaypointQuest[];
+}
 
 // Import your new components
 import MobileFooter, { TabType } from '../components/MobileFooter';
@@ -28,6 +78,9 @@ interface MapPageProps {
 }
 
 export default function MapPage({ onBack }: MapPageProps) {
+  // 2. INITIALIZE THE TRANSLATION FUNCTION
+  const { t } = useTranslation();
+
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -89,7 +142,10 @@ export default function MapPage({ onBack }: MapPageProps) {
               className="absolute inset-0 z-40 bg-background flex flex-col items-center justify-center gap-4"
             >
               <Loader2 className="w-10 h-10 text-primary animate-spin" />
-              <p className="text-muted-foreground font-medium animate-pulse">Načítání mapy...</p>
+              {/* 3. REPLACE HARDCODED TEXT WITH t() */}
+              <p className="text-muted-foreground font-medium animate-pulse">
+                {t('map.loading')}
+              </p>
             </motion.div>
           )}
         </AnimatePresence>

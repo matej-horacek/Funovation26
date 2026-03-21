@@ -1,0 +1,66 @@
+{
+"home": {
+    "main_title": "Toto je hlavní obrazovka",
+    "open_map_button": "Otevřít mapu"
+  },
+  "map": {
+    "loading": "Načítání mapy...",
+    "warning": "Upozornění",
+    "retry_location": "Zkusit znovu získat polohu",
+    "current_location": "Aktuální poloha",
+    "latitude": "Zem. šířka",
+    "longitude": "Zem. délka"
+  },  
+  "navigation": {
+    "map": "Mapa",
+    "quests": "Úkoly",
+    "score": "Skóre",
+    "settings": "Nastavení"
+  },
+  "leaderboard": {
+    "title": "Žebříček Nejlepších",
+    "player": "Hráč",
+    "rank": "Pořadí",
+    "points": "Body"
+  },
+  "settings": {
+    "title": "Nastavení",
+    "language": "Jazyk",
+    "darkMode": "Tmavý režim",
+    "logout": "Odhlásit se"
+  },
+  "quests": {
+    "won": "Vyhrál jsi!",
+    "lost": "Prohrál jsi!",
+    "answer_placeholder": "Odpověď...",
+    "submit_input": "ODESLAT",
+    "submit_selection": "POTVRDIT VÝBĚR",
+    "correct": "Správně!",
+    "incorrect": "Špatně!",
+    "good_job": "Výborná práce!",
+    "better_luck": "Příště to vyjde lépe"
+  },
+  "quest_types": {
+    "Input": "Textovka",
+    "MultipleSelect": "Více možností",
+    "SingleSelect": "Jedna možnost"
+  },
+  "search": {
+    "placeholder": "Hledat..."
+  },
+  "messages": {
+    "welcome": "Vítej v naší aplikaci!",
+    "success": "Úspěch!",
+    "error": "Chyba",
+    "loading": "Načítání...",
+    "noResults": "Žádné výsledky"
+  },
+  "common": {
+    "close": "Zavřít",
+    "cancel": "Zrušit",
+    "confirm": "Potvrdit",
+    "ok": "OK",
+    "yes": "Ano",
+    "no": "Ne"
+  }
+}

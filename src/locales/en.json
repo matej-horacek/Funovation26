@@ -1,0 +1,66 @@
+{
+ "home": {
+    "main_title": "This is the main screen",
+    "open_map_button": "Open the map"
+  },
+  "map": {
+    "loading": "Loading map...",
+    "warning": "Warning",
+    "retry_location": "Try to get location again",
+    "current_location": "Current location",
+    "latitude": "Latitude",
+    "longitude": "Longitude"
+  },   
+"navigation": {
+    "map": "Map",
+    "quests": "Quests",
+    "score": "Score",
+    "settings": "Settings"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "player": "Player",
+    "rank": "Rank",
+    "points": "Points"
+  },
+ "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "darkMode": "Dark Mode",
+    "logout": "Log Out"
+  },
+  "quests": {
+    "won": "You won!",
+    "lost": "You lost!",
+    "answer_placeholder": "Answer...",
+    "submit_input": "SUBMIT",
+    "submit_selection": "CONFIRM SELECTION",
+    "correct": "Correct!",
+    "incorrect": "Incorrect!",
+    "good_job": "Great job!",
+    "better_luck": "Better luck next time"
+  },
+  "quest_types": {
+    "Input": "Type Answer",
+    "MultipleSelect": "Multiple Choice",
+    "SingleSelect": "Single Choice"
+  },
+  "search": {
+    "placeholder": "Search..."
+  },
+  "messages": {
+    "welcome": "Welcome to our app!",
+    "success": "Success!",
+    "error": "Error",
+    "loading": "Loading...",
+    "noResults": "No results found"
+  },
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No"
+  }
+}
