@@ -6,10 +6,20 @@ import {
   Trophy, 
   Settings as SettingsIcon, 
   Sun, 
-  Moon 
+  Moon, 
+  LogOut 
 } from 'lucide-react';
+import QuestCard, { QuestType, WaypointQuest } from './QuestDisplay';
 
 export type TabType = 'map' | 'quests' | 'score' | 'settings';
+
+const mockQuest: WaypointQuest = {
+  timeLimit: 15,
+  message: "Jaká je oblíbená penetrace Vojty Liebicha?",
+  questType: QuestType.SingleSelect,
+  answerOptions: ["Zadní", "Skrz na skrz", "Tak akorát", "Medium Rare"],
+  correctAnswers: ["Zadní"]
+};
 
 interface MobileFooterProps {
   activeTab: TabType;
@@ -17,7 +27,6 @@ interface MobileFooterProps {
 }
 
 export default function MobileFooter({ activeTab, onTabChange }: MobileFooterProps) {
-  // 1. Initialize state from localStorage or system preference
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -27,7 +36,6 @@ export default function MobileFooter({ activeTab, onTabChange }: MobileFooterPro
     return false;
   });
 
-  // 2. The Logic: Watch for changes and toggle the CSS class
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDark) {
@@ -44,12 +52,12 @@ export default function MobileFooter({ activeTab, onTabChange }: MobileFooterPro
     return (
       <button
         onClick={() => onTabChange(isActive ? 'map' : tab)}
-        className={`flex flex-col items-center justify-center w-full py-4 gap-1 transition-colors duration-200 z-50 ${
-          isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+        className={`flex flex-col items-center justify-center w-full py-4 gap-1 transition-all duration-300 ${
+          isActive ? 'text-primary scale-110 font-black' : 'text-muted-foreground active:scale-95'
         }`}
       >
         <Icon className={`w-6 h-6 ${isActive ? 'fill-primary/20' : ''}`} />
-        <span className="text-[10px] font-bold tracking-wide uppercase">{label}</span>
+        <span className="text-[10px] uppercase tracking-[0.15em] font-bold">{label}</span>
       </button>
     );
   };
@@ -62,42 +70,75 @@ export default function MobileFooter({ activeTab, onTabChange }: MobileFooterPro
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-background/60 backdrop-blur-md p-4 flex flex-col justify-end pb-24"
+            className="fixed inset-0 z-[60] bg-background/60 backdrop-blur-xl p-4 flex flex-col justify-end pb-28"
           >
             <motion.div 
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
-              className="bg-card text-card-foreground shadow-2xl rounded-[2rem] border border-border p-8 overflow-y-auto max-w-lg mx-auto w-full h-fit max-h-[70vh]"
+              initial={{ y: 100, opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 100, opacity: 0, scale: 0.95 }}
+              // CHANGED: Removed overflow-y-auto here, changed to flex-col to manage inner heights
+              className="bg-card text-card-foreground shadow-[0_-20px_60px_rgba(0,0,0,0.3)] rounded-[2.5rem] border border-border p-6 sm:p-8 flex flex-col max-w-lg mx-auto w-full h-fit max-h-[85vh]"
             >
+              {/* --- Quests Tab (STRICT HEIGHT FOR FLEXBOX) --- */}
               {activeTab === 'quests' && (
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-black flex items-center gap-3"><Swords className="text-primary" /> Quests</h2>
-                  <p className="text-muted-foreground">Aktuálně nemáš žádné aktivní úkoly.</p>
+                <div className="h-[65vh] sm:h-[70vh] w-full">
+                  <QuestCard 
+                    quest={mockQuest} 
+                    onFinished={(win) => {
+                      console.log(win ? "Vyhrál jsi!" : "Prohrál jsi!");
+                      onTabChange('map');
+                    }} 
+                  />
                 </div>
               )}
 
+              {/* --- Score Tab (SCROLLABLE) --- */}
               {activeTab === 'score' && (
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-black flex items-center gap-3"><Trophy className="text-primary" /> Leaderboard</h2>
-                  <p className="text-muted-foreground">Tvůj aktuální rank: #142</p>
+                <div className="overflow-y-auto pr-2 space-y-6 w-full">
+                  <h2 className="text-3xl font-black flex items-center gap-3">
+                    <Trophy className="text-primary w-8 h-8" /> Leaderboard
+                  </h2>
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="flex justify-between items-center p-5 bg-secondary/50 rounded-2xl border border-border font-bold">
+                            <span className="flex items-center gap-3">
+                                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">#{i}</span>
+                                Hráč {i}
+                            </span>
+                            <span className="text-primary font-black">{2500 - (i * 350)} pts</span>
+                        </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
+              {/* --- Settings Tab (SCROLLABLE) --- */}
               {activeTab === 'settings' && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-black flex items-center gap-3"><SettingsIcon className="text-primary" /> Nastavení</h2>
+                <div className="overflow-y-auto pr-2 space-y-8 w-full">
+                  <h2 className="text-3xl font-black flex items-center gap-3">
+                    <SettingsIcon className="text-primary w-8 h-8" /> Nastavení
+                  </h2>
                   
-                  <div className="flex items-center justify-between p-4 bg-secondary rounded-2xl">
-                    <div className="flex items-center gap-3 font-bold">
-                      {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-                      Dark Mode
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between p-5 bg-secondary/50 rounded-2xl border border-border">
+                        <div className="flex items-center gap-3 font-bold">
+                            {isDark ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
+                            Tmavý režim
+                        </div>
+                        <button 
+                            onClick={() => setIsDark(!isDark)}
+                            className={`relative h-7 w-12 rounded-full transition-all duration-300 ${isDark ? 'bg-primary' : 'bg-stone-300'}`}
+                        >
+                            <span className={`absolute top-1 h-5 w-5 bg-white rounded-full transition-all duration-300 ${isDark ? 'left-6' : 'left-1'}`} />
+                        </button>
                     </div>
-                    <button 
-                      onClick={() => setIsDark(!isDark)}
-                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all ${isDark ? 'bg-primary' : 'bg-stone-300'}`}
-                    >
-                      <span className={`h-5 w-5 bg-white rounded-full transition-transform ${isDark ? 'translate-x-6' : 'translate-x-1'}`} />
+
+                    <button className="w-full flex items-center justify-between p-5 bg-destructive/10 text-destructive rounded-2xl border border-destructive/20 font-bold active:scale-95 transition-all group">
+                        <div className="flex items-center gap-3">
+                            <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" /> 
+                            Odhlásit se
+                        </div>
+                        <span className="text-[10px] uppercase opacity-50 font-black">Log Out</span>
                     </button>
                   </div>
                 </div>
@@ -107,7 +148,7 @@ export default function MobileFooter({ activeTab, onTabChange }: MobileFooterPro
         )}
       </AnimatePresence>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border flex justify-around items-center pb-[env(safe-area-inset-bottom)] z-[70] shadow-xl">
+      <footer className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border flex justify-around items-center pb-[env(safe-area-inset-bottom)] z-[70] shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
         <NavButton tab="map" icon={MapIcon} label="Mapa" />
         <NavButton tab="quests" icon={Swords} label="Quests" />
         <NavButton tab="score" icon={Trophy} label="Skóre" />
