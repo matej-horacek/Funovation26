@@ -1,7 +1,12 @@
 {
 "home": {
-    "main_title": "Toto je hlavní obrazovka",
+    "main_title": "Vítej v dobrodružství OutRun",
     "open_map_button": "Otevřít mapu"
+  },
+  "language": {
+    "cs": "🇨🇿 Čeština",
+    "en": "🇬🇧 Angličtina",
+    "ua": "🇺🇦 Ukrajinština"
   },
   "map": {
     "loading": "Načítání mapy...",
@@ -91,5 +96,21 @@
     "destination": "Cíl",
     "end_placeholder": "Cílová pozice...",
     "calculate_btn": "Vypočítat"
+  },
+  "title_screen": {
+    "hero_badge": "Funovation Hub",
+    "hero_description": "Začni své dobrodružství OutRun, svolaj tým, naplánuj trasu a vstup do mapy z jedné přehledné uvítací obrazovky.",
+    "lobby_card": "Vytvoř nebo se připoj bez změny stávajících akcí lobby.",
+    "routing_card": "Vyhledej start a cíl ve stejném současném toku aplikace.",
+    "status_card": "Stav připojení zůstává viditelný, ale rozhraní se čte rychleji.",
+    "primary_action_label": "Hlavní akce",
+    "primary_action_title": "Spusť živou mapu, až budeš připravený.",
+    "primary_action_description": "Je to pořád stejný vstup do mapy. Změnilo se jen vizuální zpracování.",
+    "lobby_label": "Lobby",
+    "lobby_description": "Vyplň stejné údaje jako předtím. Akce vytvoření a připojení zůstávají beze změny.",
+    "color_selected": "Vybráno",
+    "quick_summary": "Rychlý přehled",
+    "routing_label": "Trasa",
+    "routing_description": "Zachovej stejný postup výpočtu trasy, ale s přehlednějším a příjemnějším rozhraním."
   }
 }

@@ -1,7 +1,12 @@
 {
  "home": {
-    "main_title": "This is the main screen",
+    "main_title": "Welcome to the OutRun adventure",
     "open_map_button": "Open the map"
+  },
+  "language": {
+    "cs": "🇨🇿 Czech",
+    "en": "🇬🇧 English",
+    "ua": "🇺🇦 Ukrainian"
   },
   "map": {
     "loading": "Loading map...",
@@ -62,5 +67,50 @@
     "ok": "OK",
     "yes": "Yes",
     "no": "No"
+  },
+  "status": {
+    "not_connected": "Not connected",
+    "connected": "Connected to server",
+    "disconnected": "Disconnected"
+  },
+  "lobby": {
+    "title": "Lobby access",
+    "player_name": "Player name",
+    "lobby_name": "Lobby name",
+    "lobby_color": "Lobby color",
+    "password": "Password",
+    "join_id": "Room ID",
+    "join_placeholder": "Enter an ID to join",
+    "create_btn": "Create",
+    "join_btn": "Join",
+    "live_teams": "Active teams",
+    "refresh_data": "REFRESH",
+    "team_default": "Team",
+    "players_count": "Players",
+    "waiting_players": "Waiting for players..."
+  },
+  "routing": {
+    "title": "Route calculation",
+    "start_point": "Starting point",
+    "start_placeholder": "Starting position...",
+    "destination": "Destination",
+    "end_placeholder": "Destination position...",
+    "calculate_btn": "Calculate"
+  },
+  "title_screen": {
+    "hero_badge": "Funovation Hub",
+    "hero_description": "Start your OutRun journey, gather your team, plan the route, and head into the map from one focused welcome screen.",
+    "lobby_card": "Create or join without changing the existing lobby actions.",
+    "routing_card": "Search start and destination points in the same current flow.",
+    "status_card": "Connection state remains visible while the interface is easier to scan.",
+    "primary_action_label": "Primary action",
+    "primary_action_title": "Launch the live map when you are ready.",
+    "primary_action_description": "This is still the same map entry point. Only the UI framing changed.",
+    "lobby_label": "Lobby",
+    "lobby_description": "Fill in the same fields as before. Create and join actions are unchanged.",
+    "color_selected": "Selected",
+    "quick_summary": "Quick summary",
+    "routing_label": "Routing",
+    "routing_description": "Keep the current route calculation flow, but make the section easier to read and use."
   }
 }
