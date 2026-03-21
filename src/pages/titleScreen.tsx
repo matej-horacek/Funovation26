@@ -172,6 +172,7 @@ export default function App() {
             <button onClick={() => changeLanguage('cs')} className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-stone-900 transition hover:-translate-y-0.5 hover:bg-stone-50">{t('language.cs')}</button>
             <button onClick={() => changeLanguage('en')} className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-stone-900 transition hover:-translate-y-0.5 hover:bg-stone-50">{t('language.en')}</button>
             <button onClick={() => changeLanguage('ua')} className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-stone-900 transition hover:-translate-y-0.5 hover:bg-stone-50">{t('language.ua')}</button>
+            <button onClick={() => changeLanguage('emoji')} className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-stone-900 transition hover:-translate-y-0.5 hover:bg-stone-50">{t('language.emoji')}</button>
           </div>
           <div className="inline-flex items-center gap-3 rounded-full border border-black/8 bg-stone-950 px-4 py-2 text-white">
              <span className={`h-2.5 w-2.5 rounded-full ${statusKey === 'connected' ? 'bg-lime-400' : 'bg-rose-400'}`}></span>
@@ -188,7 +189,7 @@ export default function App() {
               {t('title_screen.hero_badge')}
             </div>
             <div className="max-w-2xl">
-              <h1 className="text-4xl font-semibold uppercase leading-none tracking-[-0.07em] text-stone-950 sm:text-5xl lg:text-6xl">
+              <h1 className="text-3xl font-semibold uppercase leading-none tracking-[-0.07em] text-stone-950 sm:text-5xl lg:text-6xl">
                 {t('home.main_title')}
               </h1>
               <p className="mt-4 max-w-xl text-sm leading-6 text-stone-700 sm:text-base">
@@ -261,11 +262,11 @@ export default function App() {
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
                 <label className="ml-1 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">{t('lobby.player_name')}</label>
-                <input className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-stone-950 shadow-sm transition placeholder:text-stone-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus:outline-none" type="text" value={playerName} onChange={e => setPlayerName(e.target.value)} required />
+                <input className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-stone-950 shadow-sm transition placeholder:text-stone-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus:outline-none" type="text" value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder={t('lobby.player_placeholder')} required />
               </div>
               <div className="flex flex-col gap-2">
                 <label className="ml-1 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">{t('lobby.lobby_name')}</label>
-                <input className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-stone-950 shadow-sm transition placeholder:text-stone-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus:outline-none" type="text" value={lobbyName} onChange={e => setLobbyName(e.target.value)} required />
+                <input className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-stone-950 shadow-sm transition placeholder:text-stone-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus:outline-none" type="text" value={lobbyName} onChange={e => setLobbyName(e.target.value)} placeholder={t('lobby.lobby_placeholder')} required />
               </div>
               <div className="flex flex-col gap-2">
                 <label className="ml-1 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">{t('lobby.lobby_color')}</label>
@@ -282,7 +283,7 @@ export default function App() {
             <div className="space-y-4">
               <div className="flex flex-col gap-2">
                 <label className="ml-1 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">{t('lobby.password')}</label>
-                <input className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-stone-950 shadow-sm transition placeholder:text-stone-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus:outline-none" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+                <input className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-stone-950 shadow-sm transition placeholder:text-stone-400 focus:border-primary focus:ring-4 focus:ring-primary/15 focus:outline-none" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={t('lobby.password_placeholder')} />
               </div>
               <div className="flex flex-col gap-2">
                 <label className="ml-1 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">{t('lobby.join_id')}</label>
@@ -313,6 +314,13 @@ export default function App() {
               </div>
             </div>
           </form>
+        </section>
+
+        <section className="rounded-[30px] border border-black/8 bg-[#f3ead2] p-5 text-stone-900 shadow-[0_18px_60px_-40px_rgba(0,0,0,0.28)] md:p-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-stone-600">{t('responsibility.title')}</p>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-800">
+            {t('responsibility.description')}
+          </p>
         </section>
 
         {/* --- Room & Team Status --- */}

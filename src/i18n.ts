@@ -5,6 +5,7 @@ import { initReactI18next } from 'react-i18next';
 import csJSON from './locales/cs.json';
 import enJSON from './locales/en.json';
 import uaJSON from './locales/ua.json';
+import emojiJSON from './locales/emoji.json';
 
 i18n
   .use(initReactI18next) // Passes i18n down to react-i18next
@@ -12,7 +13,8 @@ i18n
     resources: {
       en: { translation: enJSON },
       cs: { translation: csJSON },
-      ua: { translation: uaJSON }
+      ua: { translation: uaJSON },
+      emoji: { translation: emojiJSON }
     },
     lng: 'cs', // Your default language
     fallbackLng: 'en', // If a translation is missing in Czech, use English

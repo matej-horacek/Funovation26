@@ -6,7 +6,8 @@
   "language": {
     "cs": "🇨🇿 Čeština",
     "en": "🇬🇧 Angličtina",
-    "ua": "🇺🇦 Ukrajinština"
+    "ua": "🇺🇦 Ukrajinština",
+    "emoji": "😀 Emoji"
   },
   "map": {
     "loading": "Načítání mapy...",
@@ -76,9 +77,12 @@
   "lobby": {
     "title": "Vstup do lobby",
     "player_name": "Jméno hráče",
+    "player_placeholder": "Zadej jméno hráče",
     "lobby_name": "Název lobby",
+    "lobby_placeholder": "Pojmenuj lobby",
     "lobby_color": "Barva lobby",
     "password": "Heslo",
+    "password_placeholder": "Volitelné heslo",
     "join_id": "ID místnosti",
     "join_placeholder": "Zadej ID pro připojení",
     "create_btn": "Vytvořit",
@@ -112,5 +116,9 @@
     "quick_summary": "Rychlý přehled",
     "routing_label": "Trasa",
     "routing_description": "Zachovej stejný postup výpočtu trasy, ale s přehlednějším a příjemnějším rozhraním."
+  },
+  "responsibility": {
+    "title": "Zodpovědnost",
+    "description": "Domluv se s týmem, zkontroluj trasu před startem a používej mapu během hry zodpovědně."
   }
 }

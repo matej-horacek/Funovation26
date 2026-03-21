@@ -148,7 +148,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                                     : 'bg-background hover:bg-muted border border-border text-muted-foreground'
                                 }`}
                             >
-                                CZ
+                                {t('language.cs')}
                             </button>
                             <button 
                                 onClick={() => i18n.changeLanguage('en')}
@@ -158,7 +158,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                                     : 'bg-background hover:bg-muted border border-border text-muted-foreground'
                                 }`}
                             >
-                                EN
+                                {t('language.en')}
                             </button>
                             <button 
                                 onClick={() => i18n.changeLanguage('ua')}
@@ -168,7 +168,17 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                                     : 'bg-background hover:bg-muted border border-border text-muted-foreground'
                                 }`}
                             >
-                                UA
+                                {t('language.ua')}
+                            </button>
+                            <button 
+                                onClick={() => i18n.changeLanguage('emoji')}
+                                className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
+                                    currentLang === 'emoji' 
+                                    ? 'bg-primary text-primary-foreground shadow-md' 
+                                    : 'bg-background hover:bg-muted border border-border text-muted-foreground'
+                                }`}
+                            >
+                                {t('language.emoji')}
                             </button>
                         </div>
                     </div>

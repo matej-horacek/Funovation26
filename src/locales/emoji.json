@@ -1,0 +1,124 @@
+{
+  "home": {
+    "main_title": "👋🏁 🌅 OutRun 🚗✨",
+    "open_map_button": "🗺️ 🚀"
+  },
+  "language": {
+    "cs": "🇨🇿 Čeština",
+    "en": "🇬🇧 English",
+    "ua": "🇺🇦 Українська",
+    "emoji": "😀 Emoji"
+  },
+  "map": {
+    "loading": "🗺️⏳",
+    "warning": "⚠️",
+    "retry_location": "📍🔁",
+    "current_location": "📍",
+    "latitude": "↕️",
+    "longitude": "↔️"
+  },
+  "navigation": {
+    "map": "🗺️",
+    "quests": "🎯",
+    "score": "🏆",
+    "settings": "⚙️"
+  },
+  "leaderboard": {
+    "title": "🏆",
+    "player": "🧍",
+    "rank": "🥇",
+    "points": "⭐"
+  },
+  "settings": {
+    "title": "⚙️",
+    "language": "🌐",
+    "darkMode": "🌙",
+    "logout": "🚪"
+  },
+  "quests": {
+    "won": "🎉🏆",
+    "lost": "😵",
+    "answer_placeholder": "✍️...",
+    "submit_input": "✅",
+    "submit_selection": "☑️",
+    "correct": "✅",
+    "incorrect": "❌",
+    "good_job": "🔥",
+    "better_luck": "🍀"
+  },
+  "quest_types": {
+    "Input": "⌨️",
+    "MultipleSelect": "🔘🔘",
+    "SingleSelect": "🔘"
+  },
+  "search": {
+    "placeholder": "🔎..."
+  },
+  "messages": {
+    "welcome": "👋",
+    "success": "✅",
+    "error": "❌",
+    "loading": "⏳",
+    "noResults": "🙈"
+  },
+  "common": {
+    "close": "✖️",
+    "cancel": "↩️",
+    "confirm": "✅",
+    "ok": "👌",
+    "yes": "👍",
+    "no": "👎"
+  },
+  "status": {
+    "not_connected": "🔴",
+    "connected": "🟢",
+    "disconnected": "⚫"
+  },
+  "lobby": {
+    "title": "🎮🏕️",
+    "player_name": "🧍",
+    "player_placeholder": "🧍✍️",
+    "lobby_name": "🏕️",
+    "lobby_placeholder": "🏕️✍️",
+    "lobby_color": "🎨",
+    "password": "🔒",
+    "password_placeholder": "🔒❔",
+    "join_id": "#️⃣",
+    "join_placeholder": "🔑 #️⃣",
+    "create_btn": "✨",
+    "join_btn": "🤝",
+    "live_teams": "👥",
+    "refresh_data": "🔄",
+    "team_default": "👥",
+    "players_count": "🧍",
+    "waiting_players": "⏳👥"
+  },
+  "routing": {
+    "title": "🛣️",
+    "start_point": "🚩",
+    "start_placeholder": "📍...",
+    "destination": "🏁",
+    "end_placeholder": "📍...",
+    "calculate_btn": "🧭"
+  },
+  "title_screen": {
+    "hero_badge": "✨ OutRun",
+    "hero_description": "👥 + 🛣️ + 🗺️ = 🚗✨",
+    "lobby_card": "✨ 🤝 🎮",
+    "routing_card": "🚩 ➜ 🏁",
+    "status_card": "🟢 👀",
+    "primary_action_label": "🚀",
+    "primary_action_title": "🗺️ 🚗💨",
+    "primary_action_description": "🎨 only, 🔁 same flow.",
+    "lobby_label": "🎮",
+    "lobby_description": "📝 same fields, same actions.",
+    "color_selected": "🎨",
+    "quick_summary": "⚡",
+    "routing_label": "🧭",
+    "routing_description": "🛣️ same flow, ✨ better look."
+  },
+  "responsibility": {
+    "title": "🫡",
+    "description": "👥🤝 🛣️👀 🗺️✅"
+  }
+}

@@ -6,7 +6,8 @@
   "language": {
     "cs": "🇨🇿 Czech",
     "en": "🇬🇧 English",
-    "ua": "🇺🇦 Ukrainian"
+    "ua": "🇺🇦 Ukrainian",
+    "emoji": "😀 Emoji"
   },
   "map": {
     "loading": "Loading map...",
@@ -76,9 +77,12 @@
   "lobby": {
     "title": "Lobby access",
     "player_name": "Player name",
+    "player_placeholder": "Enter your player name",
     "lobby_name": "Lobby name",
+    "lobby_placeholder": "Name your lobby",
     "lobby_color": "Lobby color",
     "password": "Password",
+    "password_placeholder": "Optional password",
     "join_id": "Room ID",
     "join_placeholder": "Enter an ID to join",
     "create_btn": "Create",
@@ -112,5 +116,9 @@
     "quick_summary": "Quick summary",
     "routing_label": "Routing",
     "routing_description": "Keep the current route calculation flow, but make the section easier to read and use."
+  },
+  "responsibility": {
+    "title": "Responsibility",
+    "description": "Coordinate with your team, check your route before you start, and use the map responsibly during the game."
   }
 }
