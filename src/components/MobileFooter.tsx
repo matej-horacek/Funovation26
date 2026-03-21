@@ -62,8 +62,9 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
     const isActive = activeTab === tab;
     return (
       <button
+        type="button"
         onClick={() => onTabChange(isActive ? 'map' : tab)}
-        className={`flex flex-col items-center justify-center w-full py-4 gap-1 transition-all duration-300 ${
+        className={`flex cursor-pointer flex-col items-center justify-center w-full py-4 gap-1 transition-all duration-300 touch-manipulation ${
           isActive ? 'text-primary scale-110 font-black' : 'text-muted-foreground active:scale-95'
         }`}
       >
@@ -81,12 +82,14 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-background/60 backdrop-blur-xl p-4 flex flex-col justify-end pb-28"
+            onClick={() => onTabChange('map')}
+            className="fixed inset-0 z-[2100] bg-background/60 backdrop-blur-xl p-4 flex flex-col justify-end pb-28"
           >
             <motion.div 
               initial={{ y: 100, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 100, opacity: 0, scale: 0.95 }}
+              onClick={(event) => event.stopPropagation()}
               className="bg-card text-card-foreground shadow-[0_-20px_60px_rgba(0,0,0,0.3)] rounded-[2.5rem] border border-border p-6 sm:p-8 flex flex-col max-w-lg mx-auto w-full h-fit max-h-[85vh]"
             >
               {/* --- Quests Tab --- */}
@@ -141,6 +144,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                         <div className="flex gap-2 w-full">
                             {/* We use i18n.changeLanguage() directly now */}
                             <button 
+                                type="button"
                                 onClick={() => i18n.changeLanguage('cs')}
                                 className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
                                     currentLang === 'cs' 
@@ -151,6 +155,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                                 {t('language.cs')}
                             </button>
                             <button 
+                                type="button"
                                 onClick={() => i18n.changeLanguage('en')}
                                 className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
                                     currentLang === 'en' 
@@ -161,6 +166,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                                 {t('language.en')}
                             </button>
                             <button 
+                                type="button"
                                 onClick={() => i18n.changeLanguage('ua')}
                                 className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
                                     currentLang === 'ua' 
@@ -171,6 +177,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                                 {t('language.ua')}
                             </button>
                             <button 
+                                type="button"
                                 onClick={() => i18n.changeLanguage('emoji')}
                                 className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
                                     currentLang === 'emoji' 
@@ -190,6 +197,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                             {t('settings.darkMode')}
                         </div>
                         <button 
+                            type="button"
                             onClick={() => setIsDark(!isDark)}
                             className={`relative h-7 w-12 rounded-full transition-all duration-300 ${isDark ? 'bg-primary' : 'bg-stone-300'}`}
                         >
@@ -199,6 +207,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
 
                     {/* Logout Button */}
                     <button 
+                      type="button"
                       className="w-full flex items-center justify-between p-5 bg-destructive/10 text-destructive rounded-2xl border border-destructive/20 font-black active:scale-95 transition-all group hover:bg-destructive/20"
                       onClick={onLogout} // <--- Call the prop here
                       >
@@ -217,7 +226,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
       </AnimatePresence>
 
       {/* --- Footer Navigation --- */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border flex justify-around items-center pb-[env(safe-area-inset-bottom)] z-[70] shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+      <footer className="fixed bottom-0 left-0 right-0 z-[2200] flex justify-around items-center border-t border-border bg-background/80 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] backdrop-blur-lg pointer-events-auto touch-manipulation">
         <NavButton tab="map" icon={MapIcon} label={t('navigation.map')} />
         <NavButton tab="quests" icon={Swords} label={t('navigation.quests')} />
         <NavButton tab="score" icon={Trophy} label={t('navigation.score')} />
