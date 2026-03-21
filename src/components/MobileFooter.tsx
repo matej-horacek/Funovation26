@@ -13,12 +13,14 @@ import QuestCard, { QuestType, WaypointQuest } from './QuestDisplay';
 
 export type TabType = 'map' | 'quests' | 'score' | 'settings';
 
+
+
 const mockQuest: WaypointQuest = {
   timeLimit: 15,
-  message: "Jaká je oblíbená penetrace Vojty Liebicha?",
+  message: "Jaká je oblíbená Daň Daniela Danitele z Daňovic pod Daní?",
   questType: QuestType.SingleSelect,
-  answerOptions: ["Zadní", "Skrz na skrz", "Tak akorát", "Medium Rare"],
-  correctAnswers: ["Zadní"]
+  answerOptions: ["Daň", "Daň z Danění", "ZaDání", "Daněk"],
+  correctAnswers: ["Daň z Danění"]
 };
 
 interface MobileFooterProps {

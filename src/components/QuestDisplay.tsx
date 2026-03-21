@@ -18,7 +18,8 @@ export interface WaypointQuest {
 
 interface QuestComponentProps {
   quest: WaypointQuest;
-  onFinished: (isCorrect: boolean) => void;
+  // CHANGED: Now passes the calculated score back to the parent
+  onFinished: (isCorrect: boolean, score: number) => void; 
 }
 
 export default function QuestDisplay({ quest, onFinished }: QuestComponentProps) {
@@ -27,6 +28,9 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
   const [inputValue, setInputValue] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  
+  // CHANGED: Added state to hold the calculated score for the popup
+  const [earnedScore, setEarnedScore] = useState<number>(0);
 
   const colors = [
     'bg-red-500 hover:bg-red-600', 
@@ -47,11 +51,30 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
     }
   }, [timeLeft, isSubmitted]);
 
+  // CHANGED: The scoring method
+  const calculateScore = (correct: boolean, timeRemaining: number) => {
+    if (!correct) return 0;
+    
+    const BASE_SCORE = 500;
+    const MAX_TIME_BONUS = 500;
+    
+    // Calculates percentage of time remaining (e.g., 10s left out of 20s = 0.5)
+    const timeRatio = timeRemaining / quest.timeLimit;
+    
+    // Total score = Base (500) + Math.round(500 * ratio)
+    return BASE_SCORE + Math.round(MAX_TIME_BONUS * timeRatio);
+  };
+
   const handleFinalResult = (correct: boolean) => {
+    // Calculate and set the score exactly when the user submits
+    const finalScore = calculateScore(correct, timeLeft);
+    
+    setEarnedScore(finalScore);
     setIsCorrect(correct);
     setIsSubmitted(true);
+    
     // Wait for the popup animation to finish before closing the quest
-    setTimeout(() => onFinished(correct), 2500); 
+    setTimeout(() => onFinished(correct, finalScore), 2500); 
   };
 
   const handleToggleOption = (option: string) => {
@@ -156,7 +179,6 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
                 })}
               </div>
 
-              {/* Submit button specifically for MultipleSelect */}
               {quest.questType === QuestType.MultipleSelect && selected.length > 0 && (
                 <button 
                   onClick={handleSubmit} 
@@ -211,6 +233,20 @@ export default function QuestDisplay({ quest, onFinished }: QuestComponentProps)
             >
               {isCorrect ? 'Výborná práce!' : 'Příště to vyjde lépe'}
             </motion.p>
+
+            {/* CHANGED: Animated Score Display */}
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", bounce: 0.6, delay: 0.5 }}
+              className="mt-8 bg-black/20 px-8 py-4 rounded-3xl backdrop-blur-sm border border-white/20 shadow-inner"
+            >
+              <p className="text-4xl sm:text-6xl font-black tracking-widest text-center text-white drop-shadow-md flex items-baseline gap-2">
+                {isCorrect ? `+${earnedScore}` : '0'} 
+                <span className="text-xl sm:text-3xl opacity-80">pts</span>
+              </p>
+            </motion.div>
+            
           </motion.div>
         )}
       </AnimatePresence>
