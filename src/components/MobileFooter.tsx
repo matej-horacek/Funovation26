@@ -25,17 +25,34 @@ const mockQuest: WaypointQuest = {
   correctAnswers: ["Daň z Danění"]
 };
 
+export interface TeamScore {
+  id: string | number;
+  name: string;
+  score: number;
+}
+
+const mockTeams: TeamScore[] = [
+  { id: 1, name: 'Team Alpha', score: 2500 },
+  { id: 2, name: 'Team Beta', score: 2150 },
+  { id: 3, name: 'Team Gamma', score: 1800 },
+  { id: 4, name: 'Team Delta', score: 1450 },
+];
+
 interface MobileFooterProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
   onLogout: () => void;
+  userTeamId?: string | number; 
 }
-export default function MobileFooter({ activeTab, onTabChange, onLogout }: MobileFooterProps) {
-  // 2. Initialize translations and get access to the current language
-  const { t, i18n } = useTranslation();
+
+export default function MobileFooter({ 
+  activeTab, 
+  onTabChange, 
+  onLogout, 
+  userTeamId = 2 // Defaulting to 2 ("Team Beta") for the mock demonstration
+}: MobileFooterProps) {
   
-  // Get the active language so we can highlight the correct button ('cs', 'en', or 'uk')
-  // i18n uses 'cs' for Czech, so we check against that.
+  const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'cs';
 
   const [isDark, setIsDark] = useState(() => {
@@ -47,6 +64,8 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
     return false;
   });
 
+  const [teams, setTeams] = useState<TeamScore[]>([]);
+
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDark) {
@@ -57,6 +76,52 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
       localStorage.setItem('theme', 'light');
     }
   }, [isDark]);
+
+  useEffect(() => {
+    if (activeTab === 'score') {
+      const fetchLeaderboard = async () => {
+        try {
+          // TODO: Replace this empty block with your actual backend call
+          /*
+          const response = await fetch('/api/v1/teams/leaderboard');
+          if (!response.ok) throw new Error('Failed to fetch leaderboard');
+          const data = await response.json();
+          setTeams(data);
+          return;
+          */
+          
+          throw new Error("Backend endpoint not implemented yet.");
+        } catch (error) {
+          console.error("Failed to load team leaderboard, using mock data.", error);
+          setTeams(mockTeams);
+        }
+      };
+
+      fetchLeaderboard();
+    }
+  }, [activeTab]);
+
+  // --- Added Empty Backend Call for Adding Score ---
+  const handleAddScore = async (teamId: string | number, points: number) => {
+    try {
+      // TODO: Replace this with your actual backend call
+      /*
+      const response = await fetch('/api/v1/teams/score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ teamId, points }),
+      });
+      if (!response.ok) throw new Error('Failed to add score');
+      */
+      
+      // Mock log to show it's working
+      console.log(`[Mock Backend] Added ${points} points to team ${teamId}!`);
+    } catch (error) {
+      console.error("Failed to update score on the backend.", error);
+    }
+  };
 
   const NavButton = ({ tab, icon: Icon, label }: { tab: TabType, icon: any, label: string }) => {
     const isActive = activeTab === tab;
@@ -94,9 +159,15 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                 <div className="h-[65vh] sm:h-[70vh] w-full">
                   <QuestCard 
                     quest={mockQuest} 
-                    onFinished={(win) => {
-                      // Translated the console logs just in case!
+                    onFinished={async (win) => {
                       console.log(win ? t('quests.won') : t('quests.lost'));
+                      
+                      // --- Call the score update method if the player wins ---
+                      if (win) {
+                        // Assuming a successful quest gives 150 points. Change this as needed!
+                        await handleAddScore(userTeamId, 150);
+                      }
+
                       onTabChange('map');
                     }} 
                   />
@@ -110,15 +181,37 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                     <Trophy className="text-primary w-8 h-8" /> {t('leaderboard.title')}
                   </h2>
                   <div className="space-y-3">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="flex justify-between items-center p-5 bg-secondary/50 rounded-2xl border border-border font-bold">
-                            <span className="flex items-center gap-3">
-                                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">#{i}</span>
-                                {t('leaderboard.player')} {i}
-                            </span>
-                            <span className="text-primary font-black">{2500 - (i * 350)} {t('leaderboard.points')}</span>
-                        </div>
-                    ))}
+                    {teams.map((team, index) => {
+                        const isUserTeam = team.id === userTeamId;
+                        
+                        return (
+                          <div 
+                            key={team.id} 
+                            className={`flex justify-between items-center p-5 rounded-2xl border font-bold transition-all ${
+                              isUserTeam 
+                                ? 'bg-primary/10 border-primary text-primary shadow-[0_0_15px_rgba(var(--primary),0.15)] scale-[1.02]' 
+                                : 'bg-secondary/50 border-border'
+                            }`}
+                          >
+                              <span className="flex items-center gap-3">
+                                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                                    isUserTeam ? 'bg-primary text-primary-foreground' : 'bg-primary/20 text-primary'
+                                  }`}>
+                                    #{index + 1}
+                                  </span>
+                                  {team.name}
+                                  {isUserTeam && (
+                                    <span className="text-[10px] uppercase tracking-wider opacity-70 ml-1">
+                                      {t('leaderboard.you', '(You)')}
+                                    </span>
+                                  )}
+                              </span>
+                              <span className={`${isUserTeam ? 'font-black' : 'text-primary font-black'}`}>
+                                {team.score} {t('leaderboard.points')}
+                              </span>
+                          </div>
+                        );
+                    })}
                   </div>
                 </div>
               )}
@@ -139,7 +232,6 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                             {t('settings.language')}
                         </div>
                         <div className="flex gap-2 w-full">
-                            {/* We use i18n.changeLanguage() directly now */}
                             <button 
                                 onClick={() => i18n.changeLanguage('cs')}
                                 className={`flex-1 py-2 px-3 rounded-xl font-bold transition-all active:scale-95 ${
@@ -190,7 +282,7 @@ export default function MobileFooter({ activeTab, onTabChange, onLogout }: Mobil
                     {/* Logout Button */}
                     <button 
                       className="w-full flex items-center justify-between p-5 bg-destructive/10 text-destructive rounded-2xl border border-destructive/20 font-black active:scale-95 transition-all group hover:bg-destructive/20"
-                      onClick={onLogout} // <--- Call the prop here
+                      onClick={onLogout} 
                       >
                       <div className="flex items-center gap-3">
                         <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> 

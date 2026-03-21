@@ -8,7 +8,7 @@ import { Navigation, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { RouteInfo, Location } from '../types';
 
-interface TripMakerProps {
+export interface TripMakerProps {
   targetDistance: number;
   setTargetDistance: (distance: number) => void;
   generateTouristRoute: () => void;
@@ -18,6 +18,90 @@ interface TripMakerProps {
   clearRoute: () => void;
 }
 
+export interface Route {
+    routeId: number;
+    waipoints: Waypoint[];
+}
+
+export interface Waypoint {
+    id: number;
+    lat: number;
+    lon: number;
+    name: string;
+    locationType: string;
+    order: number;
+}
+
+export interface RouteWaypointQuest {
+    routeId: number;
+    routeWaypointQuests: WaypointQuests[];
+}
+
+export interface WaypointQuests {
+    waypoinId: number;
+    waypointQuests: WaypointQuest[];
+}
+
+export interface WaypointQuest {
+    timeLimit: number;
+    message: string;
+    questType: QuestType;
+    correctAnswers: string[];
+    answerOptions: string[];
+}
+
+export enum QuestType {
+    Input,
+    MultipleSelect,
+    SingleSelect,
+}
+
+// Mocking the Route data (from Backend)
+export const mockRoutes: Route[] = [
+  {
+    routeId: 1,
+    waipoints: [
+      { id: 101, lat: 50.0385, lon: 15.7766, name: "Zelená brána (Green Gate)", locationType: "Monument", order: 1 },
+      { id: 102, lat: 50.0407, lon: 15.7772, name: "Pardubice Castle", locationType: "Castle", order: 2 },
+      { id: 103, lat: 50.0401, lon: 15.7725, name: "Tyršovy sady", locationType: "Park", order: 3 }
+    ]
+  }
+];
+
+// Mocking the Quests associated with the Route (from Backend)
+export const mockQuests: RouteWaypointQuest[] = [
+  {
+    routeId: 1,
+    routeWaypointQuests: [
+      {
+        waypoinId: 101, 
+        waypointQuests: [
+          {
+            timeLimit: 60,
+            message: "What color is the iconic tower gate in Pardubice?",
+            questType: QuestType.SingleSelect,
+            correctAnswers: ["Green"],
+            answerOptions: ["Red", "Blue", "Green", "Yellow"]
+          }
+        ]
+      },
+      {
+        waypoinId: 102,
+        waypointQuests: [
+          {
+            timeLimit: 120,
+            message: "Which famous noble family is closely associated with this castle?",
+            questType: QuestType.Input,
+            correctAnswers: ["Pernštejn", "Pernstejn", "Pernštejnové"],
+            answerOptions: []
+          }
+        ]
+      }
+    ]
+  }
+];
+
+// --- TRIP MAKER COMPONENT ---
 export const TripMaker: React.FC<TripMakerProps> = ({
   targetDistance,
   setTargetDistance,
@@ -27,80 +111,35 @@ export const TripMaker: React.FC<TripMakerProps> = ({
   routeInfo,
   clearRoute
 }) => {
+
+  // Empty function ready for your backend logic
+  const LoadRoute = async () => {
+    try {
+      // TODO: Fetch Route[] and RouteWaypointQuest[] from your backend here
+      // Example:
+      // const response = await fetch('/api/your-endpoint');
+      // const data = await response.json();
+      
+      console.log("Loading route from backend...");
+
+    } catch (error) {
+      console.error("Failed to load route:", error);
+    }
+  };
+
   return (
-    <div className="absolute top-24 right-6 z-20 flex flex-col gap-3 w-64">
-      <div className="bg-white/90 backdrop-blur-md border border-stone-200 p-4 rounded-3xl shadow-xl">
-        <h3 className="text-sm font-bold text-stone-900 mb-3 flex items-center gap-2">
-          <Navigation className="w-4 h-4 text-emerald-600" />
-          Plánovač výletu
-        </h3>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="text-[10px] uppercase font-bold text-stone-400 block mb-2">Cílová vzdálenost: {targetDistance} km</label>
-            <input 
-              type="range" 
-              min="2" 
-              max="30" 
-              step="1"
-              value={targetDistance}
-              onChange={(e) => setTargetDistance(parseInt(e.target.value))}
-              className="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
-            />
-            <div className="flex justify-between text-[10px] text-stone-400 mt-1">
-              <span>2 km</span>
-              <span>30 km</span>
-            </div>
-          </div>
+    <div className="flex flex-col gap-4 p-4">
+      {/* Example button to trigger the LoadRoute function */}
+      <button 
+        onClick={LoadRoute}
+        className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium shadow hover:bg-emerald-700 transition-colors"
+      >
+        Load Route from Backend
+      </button>
 
-          <button 
-            onClick={generateTouristRoute}
-            disabled={isGeneratingRoute || !location}
-            className="w-full bg-emerald-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-100 disabled:opacity-50"
-          >
-            {isGeneratingRoute ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Plánuji...
-              </>
-            ) : (
-              <>
-                <Navigation className="w-4 h-4" />
-                Vytvořit trasu
-              </>
-            )}
-          </button>
-
-          {routeInfo && (
-            <button 
-              onClick={clearRoute}
-              className="w-full text-stone-500 text-xs font-medium hover:text-stone-700 transition-colors"
-            >
-              Zrušit trasu
-            </button>
-          )}
-        </div>
-      </div>
-
-      {routeInfo && (
-        <motion.div 
-          initial={{ x: 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="bg-emerald-600 text-white p-4 rounded-3xl shadow-xl"
-        >
-          <p className="text-[10px] uppercase font-bold opacity-70 mb-2">Detaily trasy</p>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="text-xs block opacity-80">Délka</span>
-              <span className="text-lg font-bold">{(routeInfo.distance || 0).toFixed(1)} km</span>
-            </div>
-            <div>
-              <span className="text-xs block opacity-80">Čas (pěšky)</span>
-              <span className="text-lg font-bold">{Math.round(routeInfo.duration)} min</span>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      {/* Your other UI elements will go here */}
     </div>
   );
 };
+
+export default TripMaker;

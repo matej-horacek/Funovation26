@@ -72,7 +72,7 @@
     "title": "Vstup do lobby",
     "player_name": "Jméno hráče",
     "lobby_name": "Název lobby",
-    "lobby_color": "Barva lobby",
+    "team_color": "Barva týmu",
     "password": "Heslo",
     "join_id": "ID místnosti",
     "join_placeholder": "Zadej ID pro připojení",
@@ -91,5 +91,34 @@
     "destination": "Cíl",
     "end_placeholder": "Cílová pozice...",
     "calculate_btn": "Vypočítat"
+  },
+  "tutorial": {
+    "welcome": {
+      "title": "Vítejte ve hře!",
+      "desc": "Připravte se na průzkum, hledání skrytých bodů a plnění úkolů. Pojďme se podívat, jak to funguje."
+    },
+    "marker": {
+      "title": "Vaše poloha",
+      "desc": "Tento modrý kurzor ukazuje vaši aktuální polohu a body zájmu, které potřebujete najít pro splnění úkolů."
+    },
+    "map": {
+      "title": "Mapa",
+      "desc": "Kliknutím sem se kdykoli vrátíte na hlavní mapu, abyste viděli své okolí a záchytné body."
+    },
+    "quests": {
+      "title": "Úkoly",
+      "desc": "Zkontrolujte své aktivní úkoly, odpovídejte na otázky a plňte výzvy na konkrétních místech."
+    },
+    "score": {
+      "title": "Skóre",
+      "desc": "Sledujte svůj pokrok, prohlédněte si nasbírané body a zjistěte, jak si vedete."
+    },
+    "settings": {
+      "title": "Nastavení",
+      "desc": "Upravte si předvolby hry, změňte jazyk nebo se odhlaste z aplikace."
+    },
+    "skip": "Přeskočit",
+    "next": "Další",
+    "finish": "Začít hrát!"
   }
 }

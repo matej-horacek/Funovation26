@@ -62,5 +62,62 @@
     "ok": "OK",
     "yes": "Yes",
     "no": "No"
+  },"status": {
+    "not_connected": "Not Connected",
+    "connected": "Connected to backend",
+    "disconnected": "Disconnected"
+  },
+  "lobby": {
+    "title": "Lobby Entry",
+    "player_name": "Player Name",
+    "lobby_name": "Lobby Name",
+    "team_color": "Team Color",
+    "password": "Password",
+    "join_id": "Join ID",
+    "join_placeholder": "Enter Room ID to Join",
+    "create_btn": "Create",
+    "join_btn": "Join",
+    "live_teams": "Live Teams",
+    "refresh_data": "REFRESH DATA",
+    "team_default": "Team",
+    "players_count": "Players",
+    "waiting_players": "Waiting for players..."
+  },
+  "routing": {
+    "title": "Calculate Mission Route",
+    "start_point": "Start Point",
+    "start_placeholder": "Start position...",
+    "destination": "Destination",
+    "end_placeholder": "End position...",
+    "calculate_btn": "Calculate"
+  },
+  "tutorial": {
+    "welcome": {
+      "title": "Welcome!",
+      "desc": "Get ready to explore, find hidden waypoints, and complete quests. Let's take a quick tour of how things work."
+    },
+    "marker": {
+      "title": "Your Location",
+      "desc": "This blue cursor shows your current location on the map and your Points of interest (POIs) that you need to find and interact with."
+    },
+    "map": {
+      "title": "Map",
+      "desc": "Tap this to return to the main map view at any time to see your surroundings and waypoints."
+    },
+    "quests": {
+      "title": "Quests",
+      "desc": "Check your active tasks, answer questions, and complete challenges at specific locations."
+    },
+    "score": {
+      "title": "Score",
+      "desc": "Track your progress, view your accumulated points, and see how well you are doing."
+    },
+    "settings": {
+      "title": "Settings",
+      "desc": "Adjust your game preferences, change the language, or log out of the application."
+    },
+    "skip": "Skip",
+    "next": "Next",
+    "finish": "Start Playing!"
   }
 }
