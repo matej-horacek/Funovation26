@@ -1,3 +1,62 @@
+# Projekt OutRun - Hackathon Funovation 26
+english version at the end of the page
+## Přehled
+Aplikace, jejímž hlavním cílem je obohatit cestovatelské zážitky vás a vašich přátel, kolegů nebo rodiny. Rozdělíte se do týmů, nastavíte, kde chcete začít a skončit a jak dlouhá má vaše trasa být – a zbytek necháte na nás. Naše webová stránka pro vás vytvoří unikátní výlet mezi vašimi cíli a provede vás různými turistickými místy, zatímco budete soutěžit s ostatními týmy, navzájem se sabotovat a objevovat své okolí!
+
+## Funkce
+* **Geolokace v reálném čase:** Při načtení automaticky vyžádá a zobrazí aktuální polohu uživatele.
+* **Interaktivní mapa:** K vykreslování využívá knihovnu Leaflet.js a mapové podklady z Mapy.cz REST API.
+* **Chytré vyhledávání (Suggest API):** Obsahuje vyhledávací pole s našeptávačem, který využívá Mapy.cz Suggest API.
+* **Plánovač výletů:** * Umožňuje uživatelům zvolit cílovou vzdálenost chůze (od 2 km do 30 km).
+  * Dotazuje se Overpass API (OpenStreetMap) pro vyhledání zajímavých bodů zájmu (POI - muzea, vyhlídky, hrady, památky) v přibližné požadované vzdálenosti.
+  * Vypočítá pěší trasu (`routeType: 'foot_hiking'`) pomocí Mapy.cz Routing API a vykreslí ji do mapy.
+  * Zobrazuje odhadovanou délku trasy a dobu chůze.
+* **Responzivní UI:** Moderní, čisté rozhraní stylované pomocí Tailwind CSS, obsahující plynulé animace poháněné knihovnou `motion/react`.
+
+## Technologie
+* **Framework:** React 19
+* **Sestavovací nástroj:** Vite
+* **Stylování:** Tailwind CSS (v4)
+* **Mapová knihovna:** Leaflet (v1.9.4)
+* **Ikony:** Lucide React
+* **Animace:** Motion (Framer Motion)
+
+## Použitá externí API
+1. **Mapy.cz REST API:**
+   * **Mapové podklady:** Stahuje základní mapovou vrstvu (`/v1/maptiles/basic/256/{z}/{x}/{y}`).
+   * **Navigace (Routing):** Vypočítává geometrii, vzdálenost a dobu trvání turistické trasy (`/v1/routing/route`).
+   * **Našeptávač (Suggest):** Pohání automatické doplňování ve vyhledávací liště (`/v1/suggest`).
+2. **Overpass API (OpenStreetMap):**
+   * **Získávání bodů zájmu (POI):** Hledá turistické atrakce (`tourism~"viewpoint|museum|attraction"`, `historic~"castle|monument"`) poblíž uživatelovy polohy ve vypočítaném okruhu.
+
+## Struktura projektu
+* `src/App.tsx`: Hlavní komponenta aplikace obsahující veškerou logiku pro správu stavu, API volání a vykreslování mapy.
+* `src/main.tsx`: Vstupní bod React aplikace.
+* `src/lib/utils.ts`: Obsahuje pomocné funkce, především funkci `cn` pro bezpečné slučování Tailwind tříd.
+* `vite.config.ts`: Konfigurace Vite, včetně integrace Tailwindu a nastavení proměnných prostředí.
+* `index.html`: HTML šablona.
+
+## Jak to funguje
+
+### 1. Inicializace mapy
+Aplikace používá effect hook ke kontrole Geolocation API v prohlížeči. Jakmile jsou souřadnice získány (nebo je výchozí poloha nastavena na Prahu v případě zamítnutí), inicializuje mapu Leaflet připojenou ke kontejneru.
+
+### 2. Funkce vyhledávání
+Psaní do vyhledávacího pole spouští zpožděné volání (debounce 300 ms) na Mapy.cz Suggest API. Výběr z našeptávače zpracuje souřadnice z odpovědi, aktualizuje stav aplikace a vycentruje mapu na nově vybranou lokaci.
+
+### 3. Logika plánovače výletů
+Po kliknutí na tlačítko "Vytvořit trasu":
+1. **Výpočet poloměru:** Aplikace vypočítá vhodný poloměr vyhledávání pro Overpass API na základě cílové vzdálenosti zvolené uživatelem.
+2. **Hledání bodů zájmu (POI):** Odešle dotaz na Overpass API za účelem nalezení relevantních turistických míst. Pokud API selže nebo nevrátí žádné výsledky, vygeneruje náhradní "fallback" bod.
+3. **Výpočet trasy:** Odešle počáteční souřadnice (poloha uživatele) a koncové souřadnice (nalezené POI) do Mapy.cz Routing API s požadavkem na výstup ve formátu GeoJSON.
+4. **Vykreslení:** Aplikace analyzuje vnořená pole souřadnic z GeoJSON, převede je do formátu Leafletu a nakreslí lomenou čáru (polyline) do mapy. Na místo určení také umístí vlastní značku (marker).
+
+
+
+
+
+
+
 # OutRun Hackathon Funovation 26 Project
 
 ## Overview
@@ -51,8 +110,4 @@ When the "Vytvořit trasu" (Generate Route) button is clicked:
 3. **Route Calculation:** It sends the start coordinates (user location) and end coordinates (found POI) to the Mapy.cz Routing API, requesting GeoJSON output.
 4. **Rendering:** The app parses the nested GeoJSON coordinate arrays, converts them to Leaflet's format, and draws a polyline on the map. It also places a custom marker at the destination.
 
-## Setup and Installation
 
-1. **Install Dependencies:**
-   ```bash
-   npm install
